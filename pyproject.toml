@@ -1,0 +1,11 @@
+[project]
+name = "genai-quizgenerator"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "flask>=3.1.3",
+    "openai>=2.31.0",
+    "psycopg2-binary>=2.9.11",
+    "pypdf>=6.10.0",
+    "requests>=2.33.1",
+]
