@@ -1049,35 +1049,34 @@ function ConfigScreen(props) {
       <div className="home-hero">
         <div className="hero-copy">
           <div className="hero-badge">
-            <span>Lumina Quiz</span>
             <span className="hero-badge-dot"></span>
-            <span>Study from your own material</span>
+            <span>AI-powered study sessions</span>
           </div>
 
-          <h1>Create clean AI quizzes from your course material.</h1>
+          <h1>Create focused quizzes from your course material.</h1>
 
           <p>
-            Upload PDFs, lecture notes or course-library material and turn them into focused quizzes.
-            Practice with hints, explanations, sources and a stricter exam mode when you want to test yourself properly.
+            Upload PDFs, lecture notes or course-library material and turn them into clear practice sessions.
+            Get hints, explanations, source references and a stricter exam mode when you want a more realistic test.
           </p>
 
           <div className="hero-highlights" aria-label="Main features">
             <div className="hero-highlight-card">
               <span>01</span>
-              <strong>Collect material</strong>
-              <p>Upload your own notes or choose prepared course material. Mix sources freely and keep everything in one quiz.</p>
+              <strong>Collect sources</strong>
+              <p>Upload your own notes or choose prepared course material. Combine several sources in one quiz without losing structure.</p>
             </div>
 
             <div className="hero-highlight-card">
               <span>02</span>
-              <strong>Shape the quiz</strong>
-              <p>Choose difficulty, language, question type and number of questions without making the setup feel complicated.</p>
+              <strong>Tune the quiz</strong>
+              <p>Control question type, difficulty, language and exam mode in a compact setup that stays easy to understand.</p>
             </div>
 
             <div className="hero-highlight-card">
               <span>03</span>
-              <strong>Learn from mistakes</strong>
-              <p>Get explanations, sources and follow-up practice so wrong answers become useful instead of frustrating.</p>
+              <strong>Review smarter</strong>
+              <p>Use explanations, sources and follow-up practice so mistakes become focused repetition.</p>
             </div>
           </div>
         </div>
@@ -1863,16 +1862,36 @@ function EditQuizModal({ title, body, form, setForm, onCancel, onConfirm }) {
 function LoadingScreen({ text, onCancel, canCancel }) {
   return (
     <div id="loading-screen">
-      <div className="loading-card">
-        <div className="loading-orb"></div>
-        <h2>
-          {text}
-          <span className="animated-dots"></span>
-        </h2>
-        <p className="muted">This might take a few seconds.</p>
+      <div className="loading-card premium-loading-card">
+        <div className="loading-visual" aria-hidden="true">
+          <div className="loading-orb premium-loading-orb"></div>
+          <div className="loading-ring loading-ring-one"></div>
+          <div className="loading-ring loading-ring-two"></div>
+        </div>
+
+        <div className="loading-copy">
+          <span className="loading-kicker">AI is preparing your quiz</span>
+          <h2>
+            {text}
+            <span className="animated-dots"></span>
+          </h2>
+          <p className="muted">
+            Reading your material, finding key points and shaping useful questions.
+          </p>
+        </div>
+
+        <div className="loading-progress" aria-hidden="true">
+          <span></span>
+        </div>
+
+        <div className="loading-steps" aria-label="Loading steps">
+          <span>Reading sources</span>
+          <span>Finding concepts</span>
+          <span>Writing questions</span>
+        </div>
 
         {canCancel && (
-          <button className="small-btn" type="button" onClick={onCancel}>
+          <button className="small-btn loading-cancel-btn" type="button" onClick={onCancel}>
             Cancel generation
           </button>
         )}
