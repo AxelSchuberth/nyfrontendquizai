@@ -14,4 +14,3 @@ instance/
 
 # IDE
 .idea/
-.env

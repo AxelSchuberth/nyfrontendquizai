@@ -1,5 +1,34 @@
 const { useEffect, useMemo, useRef, useState } = React;
 
+const TEXT = {
+  requestFailed: "Request failed.",
+  readingDocuments: "Reading your documents",
+  generatingQuiz: "Generating your quiz",
+  signingIn: "Signing you in",
+  creatingAccount: "Creating your account",
+  loadingSavedQuizzes: "Loading your saved quizzes",
+  generationCanceled: "Quiz generation was canceled.",
+  unsupportedFileType: fileName => `File type not supported for "${fileName}". Only .txt and .pdf are allowed.`,
+  duplicateMaterial: "This material is already added.",
+  duplicateFile: "That file is already added.",
+  maxItems: max => `You can only add up to ${max} files/materials in total.`,
+  maxSize: "The selected files are too large. Maximum allowed size is 50 MB.",
+  noInput: "You must upload at least one file or choose library material.",
+  extraInstructionsTooLong: count => `Your extra instructions are too long (${count} words). Maximum allowed is 5000 words.`,
+  noQuestionsGenerated: "No questions could be generated. Try another file or different instructions.",
+  generationError: "Something went wrong while generating the quiz.",
+  quizTitleDefault: "Quiz",
+  generatedQuizTitle: "AI Generated Quiz",
+  savedQuizTitle: "Saved Quiz",
+  followUpQuizTitle: "Follow-up Quiz",
+  savedSuccessfully: "Saved successfully.",
+  enterQuizName: "Please enter a quiz name.",
+  noSavedQuestions: "No saved questions were found for this quiz.",
+  editSavedQuiz: "Edit saved quiz",
+  editSavedQuizBody: "Update the name or rating for this saved quiz.",
+  updateSavedQuizError: "Could not update the saved quiz. Check that the backend route for updating assignments exists.",
+};
+
 const MAX_FILES = 5;
 const MAX_TOTAL_SIZE = 50 * 1024 * 1024;
 const MAX_CHARS = 5000;
@@ -9,7 +38,9 @@ const api = async (url, options = {}) => {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data.error || "Request failed.");
+    const error = new Error(data.error || TEXT.requestFailed);
+    error.status = response.status;
+    throw error;
   }
 
   return data;
@@ -17,7 +48,7 @@ const api = async (url, options = {}) => {
 
 function App() {
   const [screen, setScreen] = useState("config");
-  const [loadingText, setLoadingText] = useState("Reading your documents");
+  const [loadingText, setLoadingText] = useState(TEXT.readingDocuments);
   const [currentUser, setCurrentUser] = useState(null);
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -43,7 +74,7 @@ function App() {
     extraInstructions: "",
   });
 
-  const [quizTitle, setQuizTitle] = useState("Quiz");
+  const [quizTitle, setQuizTitle] = useState(TEXT.quizTitleDefault);
   const [quizData, setQuizData] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [userAnswers, setUserAnswers] = useState([]);
@@ -59,6 +90,7 @@ function App() {
 
   const timerRef = useRef(null);
   const fileInputRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
   const [saveName, setSaveName] = useState("");
   const [saveRating, setSaveRating] = useState("3");
@@ -84,6 +116,8 @@ function App() {
   const [pendingSaveAfterLogin, setPendingSaveAfterLogin] = useState(false);
   const [modal, setModal] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [editTarget, setEditTarget] = useState(null);
+  const [editForm, setEditForm] = useState({ name: "", rating: "3", error: "" });
 
   useEffect(() => {
     refreshUser();
@@ -165,13 +199,13 @@ function App() {
     if (!materialId) return;
 
     if (libraryMaterials.some(m => String(m.id) === String(materialId))) {
-      setWarning("This material is already added.");
+      setWarning(TEXT.duplicateMaterial);
       setSelectedMaterial("");
       return;
     }
 
     if (uploadedFiles.length + libraryMaterials.length >= MAX_FILES) {
-      setWarning(`You can only add up to ${MAX_FILES} files/materials in total.`);
+      setWarning(TEXT.maxItems(MAX_FILES));
       setSelectedMaterial("");
       return;
     }
@@ -222,22 +256,22 @@ function App() {
       const totalItems = next.length + libraryMaterials.length;
 
       if (!["pdf", "txt"].includes(ext)) {
-        setWarning(`File type not supported for "${file.name}". Only .txt and .pdf are allowed.`);
+        setWarning(TEXT.unsupportedFileType(file.name));
         return;
       }
 
       if (duplicate) {
-        setWarning("That file is already added.");
+        setWarning(TEXT.duplicateFile);
         return;
       }
 
       if (totalItems >= MAX_FILES) {
-        setWarning(`You can only add up to ${MAX_FILES} files/materials in total.`);
+        setWarning(TEXT.maxItems(MAX_FILES));
         return;
       }
 
       if (totalSize > MAX_TOTAL_SIZE) {
-        setWarning("The selected files are too large. Maximum allowed size is 50 MB.");
+        setWarning(TEXT.maxSize);
         return;
       }
 
@@ -276,7 +310,7 @@ function App() {
 
   const generateQuiz = async () => {
     if (uploadedFiles.length === 0 && libraryMaterials.length === 0) {
-      setWarning("You must upload at least one file or choose library material.");
+      setWarning(TEXT.noInput);
       return;
     }
 
@@ -284,7 +318,7 @@ function App() {
       const wordCount = settings.extraInstructions.trim().split(/\s+/).length;
 
       if (wordCount > 5000) {
-        setWarning(`Your extra instructions are too long (${wordCount} words). Maximum allowed is 5000 words.`);
+        setWarning(TEXT.extraInstructionsTooLong(wordCount));
         return;
       }
     }
@@ -307,25 +341,36 @@ function App() {
 
     setWarning("");
     setIsGenerating(true);
-    setLoadingText("Generating your quiz");
+    setLoadingText(TEXT.generatingQuiz);
     setScreen("loading");
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     try {
       const data = await api("/generate-quiz", {
         method: "POST",
         body: formData,
+        signal: controller.signal,
       });
 
       if (!data.questions || data.questions.length === 0) {
-        throw new Error("No questions could be generated. Try another file or different instructions.");
+        throw new Error(TEXT.noQuestionsGenerated);
       }
 
-      startQuiz(data.title || "AI Generated Quiz", data.questions, "new", null);
+      startQuiz(data.title || TEXT.generatedQuizTitle, data.questions, "new", null);
     } catch (error) {
       setScreen("config");
-      setWarning(error.message || "Something went wrong while generating the quiz.");
+      setWarning(error.name === "AbortError" ? TEXT.generationCanceled : error.message || TEXT.generationError);
     } finally {
       setIsGenerating(false);
+      abortControllerRef.current = null;
+    }
+  };
+
+  const cancelGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
     }
   };
 
@@ -464,7 +509,7 @@ function App() {
     }
 
     if (!saveName.trim()) {
-      setSaveMessage("Please enter a quiz name.");
+      setSaveMessage(TEXT.enterQuizName);
       return;
     }
 
@@ -484,7 +529,7 @@ function App() {
         }),
       });
 
-      setSaveMessage("Saved successfully.");
+      setSaveMessage(TEXT.savedSuccessfully);
       await refreshSavedQuizzes();
     } catch (error) {
       setSaveMessage(error.message);
@@ -498,6 +543,8 @@ function App() {
 
   const login = async () => {
     setLoginForm(prev => ({ ...prev, error: "" }));
+    setLoadingText(TEXT.signingIn);
+    setScreen("loading");
 
     try {
       const data = await api("/login", {
@@ -518,16 +565,20 @@ function App() {
         setPendingSaveAfterLogin(false);
         setScreen("results");
       } else {
+        setLoadingText(TEXT.loadingSavedQuizzes);
         await refreshSavedQuizzes();
         setScreen("dashboard");
       }
     } catch (error) {
       setLoginForm(prev => ({ ...prev, error: error.message }));
+      setScreen("login");
     }
   };
 
   const register = async () => {
     setRegisterForm(prev => ({ ...prev, error: "" }));
+    setLoadingText(TEXT.creatingAccount);
+    setScreen("loading");
 
     try {
       const data = await api("/register", {
@@ -549,11 +600,13 @@ function App() {
         setPendingSaveAfterLogin(false);
         setScreen("results");
       } else {
+        setLoadingText(TEXT.loadingSavedQuizzes);
         await refreshSavedQuizzes();
         setScreen("dashboard");
       }
     } catch (error) {
       setRegisterForm(prev => ({ ...prev, error: error.message }));
+      setScreen("register");
     }
   };
 
@@ -573,11 +626,14 @@ function App() {
       return;
     }
 
+    setLoadingText(TEXT.loadingSavedQuizzes);
+    setScreen("loading");
+
     try {
       await refreshSavedQuizzes();
       setScreen("dashboard");
     } catch {
-      setScreen("login");
+      setScreen("config");
     }
   };
 
@@ -607,12 +663,86 @@ function App() {
       const questions = Array.isArray(data) ? data : [];
 
       if (!questions.length) {
-        throw new Error("No saved questions were found for this quiz.");
+        throw new Error(TEXT.noSavedQuestions);
       }
 
-      startQuiz(quiz.name || "Saved Quiz", questions, "saved", quiz.id);
+      startQuiz(quiz.name || TEXT.savedQuizTitle, questions, "saved", quiz.id);
     } catch (error) {
       alert(error.message);
+    }
+  };
+
+  const updateSavedQuizRequest = async (quizId, payload) => {
+    const updateRoutes = [
+      `/update-assignment/${quizId}`,
+      `/edit-assignment/${quizId}`,
+    ];
+
+    let lastError = null;
+
+    for (const route of updateRoutes) {
+      try {
+        return await api(route, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+      } catch (error) {
+        lastError = error;
+
+        if (![404, 405].includes(error.status)) {
+          throw error;
+        }
+      }
+    }
+
+    throw lastError || new Error(TEXT.updateSavedQuizError);
+  };
+
+  const openEditQuiz = (quiz) => {
+    setEditTarget(quiz);
+    setEditForm({
+      name: quiz.name || "",
+      rating: String(quiz.rating || 3),
+      error: "",
+    });
+    setModal("edit");
+  };
+
+  const updateSavedQuiz = async () => {
+    if (!editTarget) return;
+
+    const name = editForm.name.trim();
+
+    if (!name) {
+      setEditForm(prev => ({ ...prev, error: TEXT.enterQuizName }));
+      return;
+    }
+
+    const payload = {
+      assignment_name: name,
+      star_rating: Number(editForm.rating),
+    };
+
+    try {
+      await updateSavedQuizRequest(editTarget.id, payload);
+
+      setSavedQuizzes(prev => prev.map(quiz => (
+        quiz.id === editTarget.id
+          ? { ...quiz, name, rating: Number(editForm.rating) }
+          : quiz
+      )));
+
+      setEditTarget(null);
+      setEditForm({ name: "", rating: "3", error: "" });
+      setModal(null);
+    } catch (error) {
+      setEditForm(prev => ({
+        ...prev,
+        error: error.message || TEXT.updateSavedQuizError,
+      }));
     }
   };
 
@@ -639,7 +769,7 @@ function App() {
       .map(({ index, userAnswer, ...q }) => q);
 
     if (questions.length > 0) {
-      startQuiz("Follow-up Quiz", questions, "new", null);
+      startQuiz(TEXT.followUpQuizTitle, questions, "new", null);
     }
   };
 
@@ -742,6 +872,7 @@ function App() {
               sortDir={sortDir}
               setSortDir={setSortDir}
               startSavedQuiz={startSavedQuiz}
+              editQuiz={openEditQuiz}
               askDelete={quiz => {
                 setDeleteTarget(quiz);
                 setModal("delete");
@@ -771,7 +902,13 @@ function App() {
         </main>
       </div>
 
-      {screen === "loading" && <LoadingScreen text={loadingText} />}
+      {screen === "loading" && (
+        <LoadingScreen
+          text={loadingText}
+          onCancel={cancelGeneration}
+          canCancel={isGenerating}
+        />
+      )}
 
       {modal === "exit" && (
         <ConfirmModal
@@ -796,6 +933,21 @@ function App() {
           confirm="Leave"
           onCancel={() => setModal(null)}
           onConfirm={leaveResults}
+        />
+      )}
+
+      {modal === "edit" && (
+        <EditQuizModal
+          title={TEXT.editSavedQuiz}
+          body={TEXT.editSavedQuizBody}
+          form={editForm}
+          setForm={setEditForm}
+          onCancel={() => {
+            setEditTarget(null);
+            setEditForm({ name: "", rating: "3", error: "" });
+            setModal(null);
+          }}
+          onConfirm={updateSavedQuiz}
         />
       )}
 
@@ -882,6 +1034,8 @@ function ConfigScreen(props) {
     isGenerating,
   } = props;
 
+  const totalMaterials = uploadedFiles.length + libraryMaterials.length;
+
   const dropHandlers = {
     onDragOver: e => e.preventDefault(),
     onDrop: e => {
@@ -891,26 +1045,63 @@ function ConfigScreen(props) {
   };
 
   return (
-    <section id="config-screen">
-      <div className="card upload-source-card">
-        <div className="upload-source-grid">
-          <div className="upload-source-panel">
-            <h2>Media upload</h2>
+    <section id="config-screen" className="home-screen">
+      <div className="home-hero">
+        <div className="hero-copy">
+          <div className="hero-badge">
+            <span>Lumina Quiz</span>
+            <span className="hero-badge-dot"></span>
+            <span>Study from your own material</span>
+          </div>
 
+          <h1>Create clean AI quizzes from your course material.</h1>
+
+          <p>
+            Upload PDFs, lecture notes or course-library material and turn them into focused quizzes.
+            Practice with hints, explanations, sources and a stricter exam mode when you want to test yourself properly.
+          </p>
+
+          <div className="hero-highlights" aria-label="Main features">
+            <div className="hero-highlight-card">
+              <span>01</span>
+              <strong>Collect material</strong>
+              <p>Upload your own notes or choose prepared course material. Mix sources freely and keep everything in one quiz.</p>
+            </div>
+
+            <div className="hero-highlight-card">
+              <span>02</span>
+              <strong>Shape the quiz</strong>
+              <p>Choose difficulty, language, question type and number of questions without making the setup feel complicated.</p>
+            </div>
+
+            <div className="hero-highlight-card">
+              <span>03</span>
+              <strong>Learn from mistakes</strong>
+              <p>Get explanations, sources and follow-up practice so wrong answers become useful instead of frustrating.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="home-main-grid">
+        <div className="source-panel glass-panel">
+          <div className="section-kicker">Step 1</div>
+          <div className="panel-heading-row">
+            <div>
+              <h2>Start with your material</h2>
+              <p className="muted">Drop in your own files or pick saved material from the course library.</p>
+            </div>
+          </div>
+
+          <div className="source-choice-grid">
             <div
-              id="drop-zone"
-              className="drop-zone"
+              className="source-choice-card upload-choice-card"
               {...dropHandlers}
               onClick={() => fileInputRef.current?.click()}
             >
-              <img
-                src="/static/icons/upload.svg"
-                alt=""
-                className="upload-icon"
-                aria-hidden="true"
-              />
-
-              <p className="drop-zone-text">Drag and drop files here</p>
+              <div className="choice-icon">↥</div>
+              <h3>Upload files</h3>
+              <p>Add lecture slides, summaries or notes. PDF and TXT files work best.</p>
 
               <button
                 type="button"
@@ -920,7 +1111,7 @@ function ConfigScreen(props) {
                   fileInputRef.current?.click();
                 }}
               >
-                Choose file from computer
+                Choose files
               </button>
 
               <input
@@ -935,187 +1126,170 @@ function ConfigScreen(props) {
                 }}
               />
             </div>
-          </div>
 
-          <div className="upload-divider-line">
-            <span>Or / and</span>
-          </div>
+            <div className="source-choice-card library-choice-card">
+              <div className="choice-icon">◎</div>
+              <h3>Use course library</h3>
+              <p>Choose prepared university material and combine it with your own uploads.</p>
 
-          <div className="upload-source-panel">
-            <h2>Choose from course library</h2>
+              <div className="library-select-stack">
+                <Select
+                  value={selectedUniversity}
+                  onChange={e => loadCourses(e.target.value)}
+                  options={universities.map(u => [u.id, u.name])}
+                  placeholder="Select university"
+                />
 
-            <div className="course-library-grid">
-              <Select
-                value={selectedUniversity}
-                onChange={e => loadCourses(e.target.value)}
-                options={universities.map(u => [u.id, u.name])}
-                placeholder="Select university"
-              />
+                <Select
+                  value={selectedCourse}
+                  onChange={e => loadMaterials(e.target.value)}
+                  options={courses.map(c => [c.id, c.name])}
+                  placeholder="Select course"
+                />
 
-              <Select
-                value={selectedCourse}
-                onChange={e => loadMaterials(e.target.value)}
-                options={courses.map(c => [c.id, c.name])}
-                placeholder="Select course"
-              />
-
-              <Select
-                value={selectedMaterial}
-                onChange={e => addLibraryMaterial(e.target.value)}
-                options={materials.map(m => [m.id, m.title])}
-                placeholder="Select material"
-              />
-            </div>
-          </div>
-        </div>
-
-        <FileList
-          uploadedFiles={uploadedFiles}
-          libraryMaterials={libraryMaterials}
-          removeFile={removeFile}
-          removeMaterial={removeMaterial}
-        />
-
-        <div className="file-list-container">
-          <p className="muted">Supported formats: .txt, .pdf</p>
-          {warning && <p id="file-warning" className="form-warning">{warning}</p>}
-        </div>
-      </div>
-
-      <div className="card quiz-config">
-        <h2>Quiz Settings</h2>
-
-        <div className="config-grid">
-          <LabeledSelect
-            label="Number of questions"
-            value={settings.num}
-            onChange={e => updateSetting("num", e.target.value)}
-            options={["5", "10", "15", "20", "25", "30"]}
-          />
-
-          <LabeledSelect
-            label="Question type"
-            value={settings.type}
-            onChange={e => updateSetting("type", e.target.value)}
-            options={[
-              ["T/F", "True / False"],
-              ["MCQ", "Multiple Choice"],
-            ]}
-          />
-
-          <LabeledSelect
-            label="Difficulty"
-            value={settings.difficulty}
-            onChange={e => updateSetting("difficulty", e.target.value)}
-            options={["Easy", "Medium", "Hard"]}
-          />
-
-          <LabeledSelect
-            label="Language"
-            value={settings.language}
-            onChange={e => updateSetting("language", e.target.value)}
-            options={[
-              ["Auto", "Auto (recommended)"],
-              "Swedish",
-              "English",
-            ]}
-          />
-        </div>
-
-        <hr className="section-divider" />
-
-        <div className="exam-header-row">
-          <div className="exam-heading-group">
-            <h3 className="settings-subheading">Optional: Exam mode</h3>
-
-            <span
-              className="info-tooltip"
-              tabIndex="0"
-              data-tooltip="Exam Mode simulates a real test: hints and back navigation are disabled, and feedback is hidden until the end."
-            >
-              ?
-            </span>
-          </div>
-
-          <Switch
-            checked={settings.examMode}
-            onChange={e => updateSetting("examMode", e.target.checked)}
-          />
-        </div>
-
-        <p className="muted">
-          {settings.examMode
-            ? "On — stricter quiz settings enabled."
-            : "Off — activate for stricter settings."}
-        </p>
-
-        {settings.examMode && (
-          <div className="exam-settings">
-            <div className="config-grid exam-settings-grid">
-              <LabeledSelect
-                label="Time limit"
-                value={settings.examTimeLimit}
-                onChange={e => updateSetting("examTimeLimit", e.target.value)}
-                options={[
-                  ["0", "No limit"],
-                  ["5", "5 minutes"],
-                  ["10", "10 minutes"],
-                  ["15", "15 minutes"],
-                  ["30", "30 minutes"],
-                  ["60", "60 minutes"],
-                ]}
-              />
-
-              <div className="switch-setting-row">
-                <label className="switch-setting-label">Show explanation</label>
-
-                <Switch
-                  checked={settings.examFeedback}
-                  onChange={e => updateSetting("examFeedback", e.target.checked)}
+                <Select
+                  value={selectedMaterial}
+                  onChange={e => addLibraryMaterial(e.target.value)}
+                  options={materials.map(m => [m.id, m.title])}
+                  placeholder="Select material"
                 />
               </div>
             </div>
           </div>
-        )}
 
-        <hr className="section-divider" />
-
-        <div className="extra-instructions-section">
-          <h3 className="settings-subheading">Optional: Extra instructions</h3>
-
-          <textarea
-            rows="2"
-            maxLength={MAX_CHARS}
-            value={settings.extraInstructions}
-            onChange={e => updateSetting("extraInstructions", e.target.value)}
-            placeholder="E.g. focus on chapter 3, avoid asking for years..."
+          <FileList
+            uploadedFiles={uploadedFiles}
+            libraryMaterials={libraryMaterials}
+            removeFile={removeFile}
+            removeMaterial={removeMaterial}
           />
 
-          <div className="char-counter">
-            <span>{settings.extraInstructions.length}</span> / <span>{MAX_CHARS}</span>
+          <div className="source-footer">
+            <p className="muted">Supported formats: .txt, .pdf · Max {MAX_FILES} files/materials</p>
+            {warning && <p id="file-warning" className="form-warning">{warning}</p>}
           </div>
         </div>
 
-        <hr className="section-divider" />
+        <div className="settings-panel glass-panel">
+          <div className="section-kicker">Step 2</div>
+          <h2>Quiz settings</h2>
+          <p className="muted">Fine-tune the quiz style before generating.</p>
 
-        <div className="quiz-config-reset-row">
-          <button type="button" onClick={resetInputArea}>
-            Reset
-          </button>
+          <div className="settings-card-inner">
+            <div className="config-grid premium-config-grid">
+              <LabeledSelect
+                label="Questions"
+                value={settings.num}
+                onChange={e => updateSetting("num", e.target.value)}
+                options={["5", "10", "15", "20", "25", "30"]}
+              />
+
+              <LabeledSelect
+                label="Type"
+                value={settings.type}
+                onChange={e => updateSetting("type", e.target.value)}
+                options={[
+                  ["T/F", "True / False"],
+                  ["MCQ", "Multiple Choice"],
+                ]}
+              />
+
+              <LabeledSelect
+                label="Difficulty"
+                value={settings.difficulty}
+                onChange={e => updateSetting("difficulty", e.target.value)}
+                options={["Easy", "Medium", "Hard"]}
+              />
+
+              <LabeledSelect
+                label="Language"
+                value={settings.language}
+                onChange={e => updateSetting("language", e.target.value)}
+                options={[
+                  ["Auto", "Auto (recommended)"],
+                  "Swedish",
+                  "English",
+                ]}
+              />
+            </div>
+
+            <div className="exam-mode-card">
+              <div>
+                <h3>Exam mode</h3>
+                <p className="muted">Turn on a stricter mode with fewer shortcuts and optional time pressure.</p>
+              </div>
+
+              <Switch
+                checked={settings.examMode}
+                onChange={e => updateSetting("examMode", e.target.checked)}
+              />
+            </div>
+
+            {settings.examMode && (
+              <div className="exam-settings premium-exam-settings">
+                <div className="config-grid exam-settings-grid">
+                  <LabeledSelect
+                    label="Time limit"
+                    value={settings.examTimeLimit}
+                    onChange={e => updateSetting("examTimeLimit", e.target.value)}
+                    options={[
+                      ["0", "No limit"],
+                      ["5", "5 minutes"],
+                      ["10", "10 minutes"],
+                      ["15", "15 minutes"],
+                      ["30", "30 minutes"],
+                      ["60", "60 minutes"],
+                    ]}
+                  />
+
+                  <div className="switch-setting-row">
+                    <label className="switch-setting-label">Show explanation</label>
+
+                    <Switch
+                      checked={settings.examFeedback}
+                      onChange={e => updateSetting("examFeedback", e.target.checked)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="extra-instructions-section premium-extra">
+              <h3 className="settings-subheading">Extra instructions</h3>
+
+              <textarea
+                rows="3"
+                maxLength={MAX_CHARS}
+                value={settings.extraInstructions}
+                onChange={e => updateSetting("extraInstructions", e.target.value)}
+                placeholder="Example: focus on definitions, make the questions harder, avoid asking about exact years..."
+              />
+
+              <div className="char-counter">
+                <span>{settings.extraInstructions.length}</span> / <span>{MAX_CHARS}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="card generate-quiz-card">
-        <div className="generate-quiz-content">
-          <div className="generate-quiz-text">
-            <h2>Generate quiz</h2>
-            <p className="muted">
-              When your files and settings are ready, generate a quiz based on the selected material.
-            </p>
-          </div>
+      <div className="generate-dock">
+        <div>
+          <h2>Ready when your material is.</h2>
+          <p className="muted">
+            {totalMaterials > 0
+              ? `${totalMaterials} material${totalMaterials === 1 ? "" : "s"} selected.`
+              : "Add at least one file or course material to continue."}
+          </p>
+        </div>
+
+        <div className="generate-dock-actions">
+          <button type="button" onClick={resetInputArea}>
+            Reset
+          </button>
 
           <button
-            className="primary"
+            className="primary generate-main-btn"
             type="button"
             disabled={isGenerating}
             onClick={generateQuiz}
@@ -1380,6 +1554,7 @@ function DashboardScreen({
   sortDir,
   setSortDir,
   startSavedQuiz,
+  editQuiz,
   askDelete,
 }) {
   return (
@@ -1424,6 +1599,10 @@ function DashboardScreen({
               <div className="dashboard-button-group">
                 <button className="primary small-btn" type="button" onClick={() => startSavedQuiz(quiz)}>
                   Redo
+                </button>
+
+                <button className="small-btn" type="button" onClick={() => editQuiz(quiz)}>
+                  Edit
                 </button>
 
                 <button className="small-btn delete-btn" type="button" onClick={() => askDelete(quiz)}>
@@ -1526,8 +1705,12 @@ function RegisterScreen({ form, setForm, register, goLogin, cancel }) {
 }
 
 function FileList({ uploadedFiles, libraryMaterials, removeFile, removeMaterial }) {
+  if (uploadedFiles.length === 0 && libraryMaterials.length === 0) {
+    return null;
+  }
+
   return (
-    <div className="file-list-container">
+    <div className="file-list-container premium-file-list">
       <div id="file-list">
         {libraryMaterials.map((material, index) => (
           <div className="file-item animate-in" key={`library-${material.id}`}>
@@ -1629,7 +1812,55 @@ function ConfirmModal({ title, body, cancel, confirm, onCancel, onConfirm }) {
   );
 }
 
-function LoadingScreen({ text }) {
+function EditQuizModal({ title, body, form, setForm, onCancel, onConfirm }) {
+  return (
+    <div className="modal" onClick={onCancel}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <h3>{title}</h3>
+        <p className="muted">{body}</p>
+
+        <div className="save-form">
+          <input
+            type="text"
+            value={form.name}
+            onChange={e => setForm({ ...form, name: e.target.value, error: "" })}
+            placeholder="Quiz name"
+            maxLength="50"
+          />
+
+          <div className="rating-box">
+            <label>Rating:</label>
+
+            <select
+              value={form.rating}
+              onChange={e => setForm({ ...form, rating: e.target.value, error: "" })}
+            >
+              <option value="5">⭐⭐⭐⭐⭐ (Perfect)</option>
+              <option value="4">⭐⭐⭐⭐ (Good)</option>
+              <option value="3">⭐⭐⭐ (Okay)</option>
+              <option value="2">⭐⭐ (Needs work)</option>
+              <option value="1">⭐ (Poor)</option>
+            </select>
+          </div>
+
+          {form.error && <p className="form-warning">{form.error}</p>}
+        </div>
+
+        <div className="modal-buttons">
+          <button type="button" onClick={onCancel}>
+            Cancel
+          </button>
+
+          <button className="primary" type="button" onClick={onConfirm}>
+            Save changes
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoadingScreen({ text, onCancel, canCancel }) {
   return (
     <div id="loading-screen">
       <div className="loading-card">
@@ -1639,6 +1870,12 @@ function LoadingScreen({ text }) {
           <span className="animated-dots"></span>
         </h2>
         <p className="muted">This might take a few seconds.</p>
+
+        {canCancel && (
+          <button className="small-btn" type="button" onClick={onCancel}>
+            Cancel generation
+          </button>
+        )}
       </div>
     </div>
   );
