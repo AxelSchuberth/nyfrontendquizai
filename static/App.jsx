@@ -7,6 +7,7 @@ const TEXT = {
   signingIn: "Signing you in",
   creatingAccount: "Creating your account",
   loadingSavedQuizzes: "Loading your saved quizzes",
+  loadingSavedQuiz: "Opening saved quiz",
   generationCanceled: "Quiz generation was canceled.",
   unsupportedFileType: fileName => `File type not supported for "${fileName}". Only .txt and .pdf are allowed.`,
   duplicateMaterial: "This material is already added.",
@@ -32,6 +33,12 @@ const TEXT = {
 const MAX_FILES = 5;
 const MAX_TOTAL_SIZE = 50 * 1024 * 1024;
 const MAX_CHARS = 5000;
+const GENERATION_STATUS_MESSAGES = [
+  "Reading your uploaded material",
+  "Finding concepts worth testing",
+  "Writing answer choices and explanations",
+  "Checking the quiz structure",
+];
 
 const api = async (url, options = {}) => {
   const response = await fetch(url, options);
@@ -49,6 +56,7 @@ const api = async (url, options = {}) => {
 function App() {
   const [screen, setScreen] = useState("config");
   const [loadingText, setLoadingText] = useState(TEXT.readingDocuments);
+  const [loadingVariant, setLoadingVariant] = useState("brief");
   const [currentUser, setCurrentUser] = useState(null);
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -95,6 +103,7 @@ function App() {
   const [saveName, setSaveName] = useState("");
   const [saveRating, setSaveRating] = useState("3");
   const [saveMessage, setSaveMessage] = useState("");
+  const [isSavingQuiz, setIsSavingQuiz] = useState(false);
 
   const [savedQuizzes, setSavedQuizzes] = useState([]);
   const [sortBy, setSortBy] = useState("date");
@@ -114,6 +123,7 @@ function App() {
   });
 
   const [pendingSaveAfterLogin, setPendingSaveAfterLogin] = useState(false);
+  const pendingSaveAfterLoginRef = useRef(false);
   const [modal, setModal] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [editTarget, setEditTarget] = useState(null);
@@ -342,6 +352,7 @@ function App() {
     setWarning("");
     setIsGenerating(true);
     setLoadingText(TEXT.generatingQuiz);
+    setLoadingVariant("generation");
     setScreen("loading");
 
     const controller = new AbortController();
@@ -503,6 +514,7 @@ function App() {
     setSaveMessage("");
 
     if (!currentUser) {
+      pendingSaveAfterLoginRef.current = true;
       setPendingSaveAfterLogin(true);
       setScreen("login");
       return;
@@ -512,6 +524,9 @@ function App() {
       setSaveMessage(TEXT.enterQuizName);
       return;
     }
+
+    setIsSavingQuiz(true);
+    setSaveMessage("Saving quiz...");
 
     try {
       await api("/save-result", {
@@ -533,6 +548,8 @@ function App() {
       await refreshSavedQuizzes();
     } catch (error) {
       setSaveMessage(error.message);
+    } finally {
+      setIsSavingQuiz(false);
     }
   };
 
@@ -544,6 +561,7 @@ function App() {
   const login = async () => {
     setLoginForm(prev => ({ ...prev, error: "" }));
     setLoadingText(TEXT.signingIn);
+    setLoadingVariant("brief");
     setScreen("loading");
 
     try {
@@ -561,11 +579,13 @@ function App() {
       setCurrentUser(data.user);
       setLoginForm({ username: "", password: "", error: "" });
 
-      if (pendingSaveAfterLogin) {
+      if (pendingSaveAfterLoginRef.current) {
+        pendingSaveAfterLoginRef.current = false;
         setPendingSaveAfterLogin(false);
         setScreen("results");
       } else {
         setLoadingText(TEXT.loadingSavedQuizzes);
+        setLoadingVariant("brief");
         await refreshSavedQuizzes();
         setScreen("dashboard");
       }
@@ -578,6 +598,7 @@ function App() {
   const register = async () => {
     setRegisterForm(prev => ({ ...prev, error: "" }));
     setLoadingText(TEXT.creatingAccount);
+    setLoadingVariant("brief");
     setScreen("loading");
 
     try {
@@ -596,11 +617,13 @@ function App() {
       setCurrentUser(data.user);
       setRegisterForm({ username: "", email: "", password: "", error: "" });
 
-      if (pendingSaveAfterLogin) {
+      if (pendingSaveAfterLoginRef.current) {
+        pendingSaveAfterLoginRef.current = false;
         setPendingSaveAfterLogin(false);
         setScreen("results");
       } else {
         setLoadingText(TEXT.loadingSavedQuizzes);
+        setLoadingVariant("brief");
         await refreshSavedQuizzes();
         setScreen("dashboard");
       }
@@ -627,6 +650,7 @@ function App() {
     }
 
     setLoadingText(TEXT.loadingSavedQuizzes);
+    setLoadingVariant("brief");
     setScreen("loading");
 
     try {
@@ -658,6 +682,10 @@ function App() {
   }, [savedQuizzes, sortBy, sortDir]);
 
   const startSavedQuiz = async (quiz) => {
+    setLoadingText(TEXT.loadingSavedQuiz);
+    setLoadingVariant("brief");
+    setScreen("loading");
+
     try {
       const data = await api(`/get-saved-quiz/${quiz.id}`);
       const questions = Array.isArray(data) ? data : [];
@@ -668,6 +696,7 @@ function App() {
 
       startQuiz(quiz.name || TEXT.savedQuizTitle, questions, "saved", quiz.id);
     } catch (error) {
+      setScreen("dashboard");
       alert(error.message);
     }
   };
@@ -859,6 +888,7 @@ function App() {
               setSaveRating={setSaveRating}
               saveQuiz={saveQuiz}
               saveMessage={saveMessage}
+              isSavingQuiz={isSavingQuiz}
               retryIncorrect={retryIncorrect}
             />
           )}
@@ -905,6 +935,7 @@ function App() {
       {screen === "loading" && (
         <LoadingScreen
           text={loadingText}
+          variant={loadingVariant}
           onCancel={cancelGeneration}
           canCancel={isGenerating}
         />
@@ -1213,45 +1244,47 @@ function ConfigScreen(props) {
             </div>
 
             <div className="exam-mode-card">
-              <div>
-                <h3>Exam mode</h3>
-                <p className="muted">Turn on a stricter mode with fewer shortcuts and optional time pressure.</p>
+              <div className="exam-mode-main">
+                <div>
+                  <h3>Exam mode</h3>
+                  <p className="muted">Turn on a stricter mode with fewer shortcuts and optional time pressure.</p>
+                </div>
+
+                <Switch
+                  checked={settings.examMode}
+                  onChange={e => updateSetting("examMode", e.target.checked)}
+                />
               </div>
 
-              <Switch
-                checked={settings.examMode}
-                onChange={e => updateSetting("examMode", e.target.checked)}
-              />
-            </div>
-
-            {settings.examMode && (
-              <div className="exam-settings premium-exam-settings">
-                <div className="config-grid exam-settings-grid">
-                  <LabeledSelect
-                    label="Time limit"
-                    value={settings.examTimeLimit}
-                    onChange={e => updateSetting("examTimeLimit", e.target.value)}
-                    options={[
-                      ["0", "No limit"],
-                      ["5", "5 minutes"],
-                      ["10", "10 minutes"],
-                      ["15", "15 minutes"],
-                      ["30", "30 minutes"],
-                      ["60", "60 minutes"],
-                    ]}
-                  />
-
-                  <div className="switch-setting-row">
-                    <label className="switch-setting-label">Show explanation</label>
-
-                    <Switch
-                      checked={settings.examFeedback}
-                      onChange={e => updateSetting("examFeedback", e.target.checked)}
+              {settings.examMode && (
+                <div className="exam-settings premium-exam-settings">
+                  <div className="config-grid exam-settings-grid">
+                    <LabeledSelect
+                      label="Time limit"
+                      value={settings.examTimeLimit}
+                      onChange={e => updateSetting("examTimeLimit", e.target.value)}
+                      options={[
+                        ["0", "No limit"],
+                        ["5", "5 minutes"],
+                        ["10", "10 minutes"],
+                        ["15", "15 minutes"],
+                        ["30", "30 minutes"],
+                        ["60", "60 minutes"],
+                      ]}
                     />
+
+                    <div className="switch-setting-row exam-feedback-card">
+                      <label className="switch-setting-label">Show explanation</label>
+
+                      <Switch
+                        checked={settings.examFeedback}
+                        onChange={e => updateSetting("examFeedback", e.target.checked)}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             <div className="extra-instructions-section premium-extra">
               <h3 className="settings-subheading">Extra instructions</h3>
@@ -1453,6 +1486,7 @@ function ResultsScreen({
   setSaveRating,
   saveQuiz,
   saveMessage,
+  isSavingQuiz,
   retryIncorrect,
 }) {
   const percent = quizData.length ? Math.round((score / quizData.length) * 100) : 0;
@@ -1477,12 +1511,13 @@ function ResultsScreen({
                 onChange={e => setSaveName(e.target.value)}
                 placeholder="Name your quiz"
                 maxLength="50"
+                disabled={isSavingQuiz}
               />
 
               <div className="rating-box">
                 <label>Rate the difficulty:</label>
 
-                <select value={saveRating} onChange={e => setSaveRating(e.target.value)}>
+                <select value={saveRating} onChange={e => setSaveRating(e.target.value)} disabled={isSavingQuiz}>
                   <option value="5">⭐⭐⭐⭐⭐ (Perfect)</option>
                   <option value="4">⭐⭐⭐⭐ (Good)</option>
                   <option value="3">⭐⭐⭐ (Okay)</option>
@@ -1491,11 +1526,16 @@ function ResultsScreen({
                 </select>
               </div>
 
-              <button className="primary" type="button" onClick={saveQuiz}>
-                Save to My Quizzes
+              <button className="primary" type="button" onClick={saveQuiz} disabled={isSavingQuiz}>
+                {isSavingQuiz ? "Saving..." : "Save to My Quizzes"}
               </button>
 
-              {saveMessage && <p className="muted">{saveMessage}</p>}
+              {saveMessage && (
+                <p className={`muted save-status${isSavingQuiz ? " is-loading" : ""}`} aria-live="polite">
+                  {isSavingQuiz && <span className="inline-spinner" aria-hidden="true"></span>}
+                  {saveMessage}
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -1718,9 +1758,11 @@ function FileList({ uploadedFiles, libraryMaterials, removeFile, removeMaterial 
             <button
               type="button"
               className="file-remove-btn"
+              aria-label={`Remove ${material.title}`}
+              title="Remove"
               onClick={() => removeMaterial(index)}
             >
-              X
+              &times;
             </button>
           </div>
         ))}
@@ -1732,9 +1774,11 @@ function FileList({ uploadedFiles, libraryMaterials, removeFile, removeMaterial 
             <button
               type="button"
               className="file-remove-btn"
+              aria-label={`Remove ${file.name}`}
+              title="Remove"
               onClick={() => removeFile(index)}
             >
-              X
+              &times;
             </button>
           </div>
         ))}
@@ -1745,7 +1789,7 @@ function FileList({ uploadedFiles, libraryMaterials, removeFile, removeMaterial 
 
 function LabeledSelect({ label, value, onChange, options }) {
   return (
-    <div className="select-wrapper">
+    <div className="select-wrapper quiz-setting-card">
       <label>{label}</label>
 
       <select value={value} onChange={onChange}>
@@ -1859,35 +1903,48 @@ function EditQuizModal({ title, body, form, setForm, onCancel, onConfirm }) {
   );
 }
 
-function LoadingScreen({ text, onCancel, canCancel }) {
+function LoadingScreen({ text, variant = "brief", onCancel, canCancel }) {
+  const [statusIndex, setStatusIndex] = useState(0);
+
+  useEffect(() => {
+    if (variant !== "generation") return undefined;
+
+    const intervalId = setInterval(() => {
+      setStatusIndex(index => (index + 1) % GENERATION_STATUS_MESSAGES.length);
+    }, 2200);
+
+    return () => clearInterval(intervalId);
+  }, [variant]);
+
+  if (variant !== "generation") {
+    return (
+      <div id="loading-screen" className="brief-loading-screen" role="status" aria-live="polite">
+        <div className="brief-loading-card">
+          <div className="brief-loading-spinner" aria-hidden="true"></div>
+          <p>{text}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div id="loading-screen">
+    <div id="loading-screen" className="generation-loading-screen">
       <div className="loading-card premium-loading-card">
+        <p className="loading-context-label">Preparing quiz</p>
         <div className="loading-visual" aria-hidden="true">
+          <span className="processing-node processing-node-source">TXT</span>
           <div className="loading-orb premium-loading-orb"></div>
-          <div className="loading-ring loading-ring-one"></div>
-          <div className="loading-ring loading-ring-two"></div>
+          <span className="processing-node processing-node-question">?</span>
+          <span className="processing-node processing-node-answer">A</span>
         </div>
 
-        <div className="loading-copy">
-          <span className="loading-kicker">AI is preparing your quiz</span>
-          <h2>
-            {text}
-            <span className="animated-dots"></span>
-          </h2>
-          <p className="muted">
-            Reading your material, finding key points and shaping useful questions.
+        <div className="loading-copy" role="status" aria-live="polite">
+          <p className="generation-status" key={statusIndex}>
+            {GENERATION_STATUS_MESSAGES[statusIndex]}
           </p>
-        </div>
-
-        <div className="loading-progress" aria-hidden="true">
-          <span></span>
-        </div>
-
-        <div className="loading-steps" aria-label="Loading steps">
-          <span>Reading sources</span>
-          <span>Finding concepts</span>
-          <span>Writing questions</span>
+          <p className="muted">
+            Larger files can take a moment.
+          </p>
         </div>
 
         {canCancel && (
