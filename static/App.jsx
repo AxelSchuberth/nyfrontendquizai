@@ -1,44 +1,340 @@
-const { useEffect, useMemo, useRef, useState } = React;
+﻿const { useEffect, useMemo, useRef, useState } = React;
 
-const TEXT = {
-  requestFailed: "Request failed.",
-  readingDocuments: "Reading your documents",
-  generatingQuiz: "Generating your quiz",
-  signingIn: "Signing you in",
-  creatingAccount: "Creating your account",
-  loadingSavedQuizzes: "Loading your saved quizzes",
-  loadingSavedQuiz: "Opening saved quiz",
-  generationCanceled: "Quiz generation was canceled.",
-  unsupportedFileType: fileName => `File type not supported for "${fileName}". Only .txt and .pdf are allowed.`,
-  duplicateMaterial: "This material is already added.",
-  duplicateFile: "That file is already added.",
-  maxItems: max => `You can only add up to ${max} files/materials in total.`,
-  maxSize: "The selected files are too large. Maximum allowed size is 50 MB.",
-  noInput: "You must upload at least one file or choose library material.",
-  extraInstructionsTooLong: count => `Your extra instructions are too long (${count} words). Maximum allowed is 5000 words.`,
-  noQuestionsGenerated: "No questions could be generated. Try another file or different instructions.",
-  generationError: "Something went wrong while generating the quiz.",
-  quizTitleDefault: "Quiz",
-  generatedQuizTitle: "AI Generated Quiz",
-  savedQuizTitle: "Saved Quiz",
-  followUpQuizTitle: "Follow-up Quiz",
-  savedSuccessfully: "Saved successfully.",
-  enterQuizName: "Please enter a quiz name.",
-  noSavedQuestions: "No saved questions were found for this quiz.",
-  editSavedQuiz: "Edit saved quiz",
-  editSavedQuizBody: "Update the name or rating for this saved quiz.",
-  updateSavedQuizError: "Could not update the saved quiz. Check that the backend route for updating assignments exists.",
+const UI_TEXT = {
+  en: {
+    requestFailed: "Request failed.",
+    readingDocuments: "Reading your documents",
+    generatingQuiz: "Generating your quiz",
+    signingIn: "Signing you in",
+    creatingAccount: "Creating your account",
+    loadingSavedQuizzes: "Loading your saved quizzes",
+    loadingSavedQuiz: "Opening saved quiz",
+    generationCanceled: "Quiz generation was canceled.",
+    unsupportedFileType: fileName => `File type not supported for "${fileName}". Only .txt and .pdf are allowed.`,
+    duplicateMaterial: "This material is already added.",
+    duplicateFile: "That file is already added.",
+    maxItems: max => `You can only add up to ${max} files/materials in total.`,
+    maxSize: "The selected files are too large. Maximum allowed size is 50 MB.",
+    noInput: "You must upload at least one file or choose library material.",
+    extraInstructionsTooLong: count => `Your extra instructions are too long (${count} words). Maximum allowed is 5000 words.`,
+    noQuestionsGenerated: "No questions could be generated. Try another file or different instructions.",
+    generationError: "Something went wrong while generating the quiz.",
+    quizTitleDefault: "Quiz",
+    generatedQuizTitle: "AI Generated Quiz",
+    savedQuizTitle: "Saved Quiz",
+    followUpQuizTitle: "Follow-up Quiz",
+    savedSuccessfully: "Saved successfully.",
+    savingQuiz: "Saving quiz...",
+    enterQuizName: "Please enter a quiz name.",
+    noSavedQuestions: "No saved questions were found for this quiz.",
+    editSavedQuiz: "Edit saved quiz",
+    editSavedQuizBody: "Update the name or rating for this saved quiz.",
+    updateSavedQuizError: "Could not update the saved quiz. Check that the backend route for updating assignments exists.",
+    generationStatusMessages: [
+      "Reading your uploaded material",
+      "Finding concepts worth testing",
+      "Writing answer choices and explanations",
+      "Checking the quiz structure",
+    ],
+    appLanguage: "Application language",
+    english: "English",
+    swedish: "Swedish",
+    backToStart: "← Back to start",
+    logout: "Log out",
+    endQuiz: "End quiz",
+    backToGenerator: "← Back to generator",
+    login: "Log in",
+    myQuizzes: name => `${name}'s Quizzes`,
+    heroBadge: "AI-powered study sessions",
+    heroTitle: "Create focused quizzes from your course material.",
+    heroBody: "Upload PDFs, lecture notes or course-library material and turn them into clear practice sessions. Get hints, explanations, source references and a stricter exam mode when you want a more realistic test.",
+    collectSources: "Collect sources",
+    collectSourcesBody: "Upload your own notes or choose prepared course material. Combine several sources in one quiz without losing structure.",
+    tuneQuiz: "Tune the quiz",
+    tuneQuizBody: "Control question type, difficulty, language and exam mode in a compact setup that stays easy to understand.",
+    reviewSmarter: "Review smarter",
+    reviewSmarterBody: "Use explanations, sources and follow-up practice so mistakes become focused repetition.",
+    step1: "Step 1",
+    step2: "Step 2",
+    startWithMaterial: "Start with your material",
+    startWithMaterialBody: "Drop in your own files or pick saved material from the course library.",
+    uploadFiles: "Upload files",
+    uploadFilesBody: "Add lecture slides, summaries or notes. PDF and TXT files work best.",
+    chooseFiles: "Choose files",
+    useCourseLibrary: "Use course library",
+    useCourseLibraryBody: "Choose prepared university material and combine it with your own uploads.",
+    selectUniversity: "Select university",
+    selectCourse: "Select course",
+    selectMaterial: "Select material",
+    supportedFormats: max => `Supported formats: .txt, .pdf · Max ${max} files/materials`,
+    quizSettings: "Quiz settings",
+    quizSettingsBody: "Fine-tune the quiz style before generating.",
+    questions: "Questions",
+    type: "Type",
+    trueFalse: "True / False",
+    multipleChoice: "Multiple Choice",
+    difficulty: "Difficulty",
+    easy: "Easy",
+    medium: "Medium",
+    hard: "Hard",
+    language: "Language",
+    autoRecommended: "Auto (recommended)",
+    examMode: "Exam mode",
+    examModeBody: "Turn on a stricter mode with fewer shortcuts and optional time pressure.",
+    timeLimit: "Time limit",
+    noLimit: "No limit",
+    minutes: count => `${count} minutes`,
+    showExplanation: "Show explanation",
+    extraInstructions: "Extra instructions",
+    extraInstructionsPlaceholder: "Example: focus on definitions, make the questions harder, avoid asking about exact years...",
+    readyTitle: "Ready when your material is.",
+    materialsSelected: count => `${count} material${count === 1 ? "" : "s"} selected.`,
+    addMaterialToContinue: "Add at least one file or course material to continue.",
+    reset: "Reset",
+    generateQuiz: "Generate quiz",
+    generating: "Generating...",
+    loadingQuestion: "Loading question...",
+    timeRemaining: "Time remaining:",
+    back: "← Back",
+    hint: "💡 Hint",
+    finish: "Finish",
+    next: "Next →",
+    correct: "Correct.",
+    incorrect: "Incorrect.",
+    correctAnswer: "Correct answer:",
+    source: "Source:",
+    hintFallback: value => `Look for the part of the material connected to: ${value}`,
+    results: "Results:",
+    percentCorrect: "correct",
+    saveThisQuiz: "Save this quiz",
+    nameYourQuiz: "Name your quiz",
+    rateDifficulty: "Rate the difficulty:",
+    ratingPerfect: "⭐⭐⭐⭐⭐ (Perfect)",
+    ratingGood: "⭐⭐⭐⭐ (Good)",
+    ratingOkay: "⭐⭐⭐ (Okay)",
+    ratingNeedsWork: "⭐⭐ (Needs work)",
+    ratingPoor: "⭐ (Poor)",
+    saveToMyQuizzes: "Save to My Quizzes",
+    saving: "Saving...",
+    questionsToReview: "Questions to review:",
+    noIncorrectAnswers: "No incorrect answers 🎉",
+    questionLabel: number => `Question ${number}:`,
+    yourAnswer: "Your answer:",
+    skipped: "Skipped",
+    followUpQuiz: count => `Follow Up Quiz (${count})`,
+    savedQuizzesTitle: name => `${name}'s Saved Quizzes`,
+    mySavedQuizzes: "My Saved Quizzes",
+    sortByDate: "Sort by: Date",
+    sortByName: "Sort by: Name",
+    sortByScore: "Sort by: Score",
+    sortByRating: "Sort by: Rating",
+    descending: "↓ Descending",
+    ascending: "↑ Ascending",
+    noSavedQuizzes: "No saved quizzes yet.",
+    unknownDate: "Unknown date",
+    recentScore: "Recent score:",
+    rating: "Rating:",
+    redo: "Redo",
+    edit: "Edit",
+    delete: "Delete",
+    username: "Username",
+    password: "Password",
+    email: "Email",
+    createAccount: "Create an account",
+    cancel: "← Cancel",
+    register: "Register",
+    alreadyHaveAccount: "Already have an account?",
+    quizName: "Quiz name",
+    saveChanges: "Save changes",
+    endQuizTitle: "End quiz?",
+    endQuizBody: "Your progress in this quiz will be lost.",
+    continueQuiz: "Continue",
+    exitResultsTitle: "Leave results?",
+    exitResultsBody: "Unsaved quiz results will be lost.",
+    leave: "Leave",
+    deleteQuizTitle: "Delete quiz?",
+    deleteQuizBody: name => `Are you sure you want to delete "${name || "this quiz"}"?`,
+    aiPreparingQuiz: "Preparing quiz",
+    generationDelayNote: "Larger files can take a moment.",
+    libraryPrefix: "Library:",
+    remove: value => `Remove ${value}`,
+  },
+  sv: {
+    requestFailed: "Förfrågan misslyckades.",
+    readingDocuments: "Läser dina dokument",
+    generatingQuiz: "Skapar ditt quiz",
+    signingIn: "Loggar in dig",
+    creatingAccount: "Skapar ditt konto",
+    loadingSavedQuizzes: "Laddar dina sparade quiz",
+    loadingSavedQuiz: "Öppnar sparat quiz",
+    generationCanceled: "Quizgenereringen avbröts.",
+    unsupportedFileType: fileName => `Filtypen stöds inte för "${fileName}". Endast .txt och .pdf är tillåtna.`,
+    duplicateMaterial: "Det här materialet är redan tillagt.",
+    duplicateFile: "Den filen är redan tillagd.",
+    maxItems: max => `Du kan bara lägga till upp till ${max} filer/material totalt.`,
+    maxSize: "De valda filerna är för stora. Maximal tillåten storlek är 50 MB.",
+    noInput: "Du måste ladda upp minst en fil eller välja biblioteksmaterial.",
+    extraInstructionsTooLong: count => `Dina extra instruktioner är för långa (${count} ord). Max är 5000 ord.`,
+    noQuestionsGenerated: "Inga frågor kunde skapas. Prova en annan fil eller andra instruktioner.",
+    generationError: "Något gick fel när quizet skulle skapas.",
+    quizTitleDefault: "Quiz",
+    generatedQuizTitle: "AI-skapat quiz",
+    savedQuizTitle: "Sparat quiz",
+    followUpQuizTitle: "Uppföljningsquiz",
+    savedSuccessfully: "Sparat.",
+    savingQuiz: "Sparar quiz...",
+    enterQuizName: "Ange ett quiznamn.",
+    noSavedQuestions: "Inga sparade frågor hittades för detta quiz.",
+    editSavedQuiz: "Redigera sparat quiz",
+    editSavedQuizBody: "Uppdatera namn eller betyg för detta sparade quiz.",
+    updateSavedQuizError: "Det gick inte att uppdatera quizet. Kontrollera att backend-rutten för att uppdatera uppgifter finns.",
+    generationStatusMessages: [
+      "Läser ditt uppladdade material",
+      "Hittar begrepp värda att testa",
+      "Skriver svarsalternativ och förklaringar",
+      "Kontrollerar quizets struktur",
+    ],
+    appLanguage: "Applikationsspråk",
+    english: "English",
+    swedish: "Svenska",
+    backToStart: "← Till start",
+    logout: "Logga ut",
+    endQuiz: "Avsluta quiz",
+    backToGenerator: "← Till generatorn",
+    login: "Logga in",
+    myQuizzes: name => `${name}s quiz`,
+    heroBadge: "AI-drivna studietillfällen",
+    heroTitle: "Skapa fokuserade quiz från ditt kursmaterial.",
+    heroBody: "Ladda upp PDF:er, föreläsningsanteckningar eller material från kursbiblioteket och gör dem till tydliga övningar. Få ledtrådar, förklaringar, källhänvisningar och ett striktare examensläge när du vill ha ett mer realistiskt test.",
+    collectSources: "Samla källor",
+    collectSourcesBody: "Ladda upp egna anteckningar eller välj förberett kursmaterial. Kombinera flera källor i ett quiz utan att tappa strukturen.",
+    tuneQuiz: "Anpassa quizet",
+    tuneQuizBody: "Styr frågetyp, svårighetsgrad, språk och examensläge i en kompakt inställning som är lätt att förstå.",
+    reviewSmarter: "Repetera smartare",
+    reviewSmarterBody: "Använd förklaringar, källor och uppföljande övningar så att misstag blir fokuserad repetition.",
+    step1: "Steg 1",
+    step2: "Steg 2",
+    startWithMaterial: "Börja med ditt material",
+    startWithMaterialBody: "Släpp in egna filer eller välj sparat material från kursbiblioteket.",
+    uploadFiles: "Ladda upp filer",
+    uploadFilesBody: "Lägg till föreläsningsbilder, sammanfattningar eller anteckningar. PDF- och TXT-filer fungerar bäst.",
+    chooseFiles: "Välj filer",
+    useCourseLibrary: "Använd kursbibliotek",
+    useCourseLibraryBody: "Välj förberett universitetsmaterial och kombinera det med egna uppladdningar.",
+    selectUniversity: "Välj universitet",
+    selectCourse: "Välj kurs",
+    selectMaterial: "Välj material",
+    supportedFormats: max => `Format som stöds: .txt, .pdf · Max ${max} filer/material`,
+    quizSettings: "Quizinställningar",
+    quizSettingsBody: "Finjustera quizets stil innan det skapas.",
+    questions: "Frågor",
+    type: "Typ",
+    trueFalse: "Sant / Falskt",
+    multipleChoice: "Flerval",
+    difficulty: "Svårighetsgrad",
+    easy: "Lätt",
+    medium: "Medel",
+    hard: "Svår",
+    language: "Språk",
+    autoRecommended: "Auto (rekommenderas)",
+    examMode: "Examensläge",
+    examModeBody: "Slå på ett striktare läge med färre genvägar och valfri tidspress.",
+    timeLimit: "Tidsgräns",
+    noLimit: "Ingen gräns",
+    minutes: count => `${count} minuter`,
+    showExplanation: "Visa förklaring",
+    extraInstructions: "Extra instruktioner",
+    extraInstructionsPlaceholder: "Exempel: fokusera på definitioner, gör frågorna svårare, undvik exakta årtal...",
+    readyTitle: "Redo när ditt material är det.",
+    materialsSelected: count => `${count} material ${count === 1 ? "valt" : "valda"}.`,
+    addMaterialToContinue: "Lägg till minst en fil eller ett kursmaterial för att fortsätta.",
+    reset: "Återställ",
+    generateQuiz: "Skapa quiz",
+    generating: "Skapar...",
+    loadingQuestion: "Laddar fråga...",
+    timeRemaining: "Tid kvar:",
+    back: "← Tillbaka",
+    hint: "💡 Ledtråd",
+    finish: "Slutför",
+    next: "Nästa →",
+    correct: "Rätt.",
+    incorrect: "Fel.",
+    correctAnswer: "Rätt svar:",
+    source: "Källa:",
+    hintFallback: value => `Titta efter den del av materialet som hör ihop med: ${value}`,
+    results: "Resultat:",
+    percentCorrect: "rätt",
+    saveThisQuiz: "Spara detta quiz",
+    nameYourQuiz: "Namnge ditt quiz",
+    rateDifficulty: "Betygsätt svårighetsgraden:",
+    ratingPerfect: "⭐⭐⭐⭐⭐ (Perfekt)",
+    ratingGood: "⭐⭐⭐⭐ (Bra)",
+    ratingOkay: "⭐⭐⭐ (Okej)",
+    ratingNeedsWork: "⭐⭐ (Behöver förbättras)",
+    ratingPoor: "⭐ (Dåligt)",
+    saveToMyQuizzes: "Spara till mina quiz",
+    saving: "Sparar...",
+    questionsToReview: "Frågor att repetera:",
+    noIncorrectAnswers: "Inga felaktiga svar 🎉",
+    questionLabel: number => `Fråga ${number}:`,
+    yourAnswer: "Ditt svar:",
+    skipped: "Hoppad över",
+    followUpQuiz: count => `Uppföljningsquiz (${count})`,
+    savedQuizzesTitle: name => `${name}s sparade quiz`,
+    mySavedQuizzes: "Mina sparade quiz",
+    sortByDate: "Sortera efter: Datum",
+    sortByName: "Sortera efter: Namn",
+    sortByScore: "Sortera efter: Poäng",
+    sortByRating: "Sortera efter: Betyg",
+    descending: "↓ Fallande",
+    ascending: "↑ Stigande",
+    noSavedQuizzes: "Inga sparade quiz ännu.",
+    unknownDate: "Okänt datum",
+    recentScore: "Senaste resultat:",
+    rating: "Betyg:",
+    redo: "Gör igen",
+    edit: "Redigera",
+    delete: "Ta bort",
+    username: "Användarnamn",
+    password: "Lösenord",
+    email: "E-post",
+    createAccount: "Skapa konto",
+    cancel: "← Avbryt",
+    register: "Registrera",
+    alreadyHaveAccount: "Har du redan ett konto?",
+    quizName: "Quiznamn",
+    saveChanges: "Spara ändringar",
+    endQuizTitle: "Avsluta quiz?",
+    endQuizBody: "Dina framsteg i detta quiz går förlorade.",
+    continueQuiz: "Fortsätt",
+    exitResultsTitle: "Lämna resultat?",
+    exitResultsBody: "Osparade quizresultat går förlorade.",
+    leave: "Lämna",
+    deleteQuizTitle: "Ta bort quiz?",
+    deleteQuizBody: name => `Är du säker på att du vill ta bort "${name || "detta quiz"}"?`,
+    aiPreparingQuiz: "Förbereder quiz",
+    generationDelayNote: "Större filer kan ta en stund.",
+    libraryPrefix: "Bibliotek:",
+    remove: value => `Ta bort ${value}`,
+  },
+};
+
+const TEXT = UI_TEXT.en;
+const APP_LOCALES = { en: "en-US", sv: "sv-SE" };
+const detectAppLanguage = () => {
+  const savedLanguage = window.localStorage?.getItem("appLanguage");
+
+  if (savedLanguage === "en" || savedLanguage === "sv") {
+    return savedLanguage;
+  }
+
+  const languages = navigator.languages?.length ? navigator.languages : [navigator.language || "en"];
+  return languages.some(language => String(language).toLowerCase().startsWith("sv")) ? "sv" : "en";
 };
 
 const MAX_FILES = 5;
 const MAX_TOTAL_SIZE = 50 * 1024 * 1024;
 const MAX_CHARS = 5000;
-const GENERATION_STATUS_MESSAGES = [
-  "Reading your uploaded material",
-  "Finding concepts worth testing",
-  "Writing answer choices and explanations",
-  "Checking the quiz structure",
-];
 
 const api = async (url, options = {}) => {
   const response = await fetch(url, options);
@@ -54,8 +350,10 @@ const api = async (url, options = {}) => {
 };
 
 function App() {
+  const [appLanguage, setAppLanguage] = useState(detectAppLanguage);
+  const t = UI_TEXT[appLanguage] || UI_TEXT.en;
   const [screen, setScreen] = useState("config");
-  const [loadingText, setLoadingText] = useState(TEXT.readingDocuments);
+  const [loadingText, setLoadingText] = useState(t.readingDocuments);
   const [loadingVariant, setLoadingVariant] = useState("brief");
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -82,7 +380,7 @@ function App() {
     extraInstructions: "",
   });
 
-  const [quizTitle, setQuizTitle] = useState(TEXT.quizTitleDefault);
+  const [quizTitle, setQuizTitle] = useState(t.quizTitleDefault);
   const [quizData, setQuizData] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [userAnswers, setUserAnswers] = useState([]);
@@ -128,6 +426,31 @@ function App() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [editTarget, setEditTarget] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", rating: "3", error: "" });
+
+  useEffect(() => {
+    document.documentElement.lang = appLanguage;
+    window.localStorage?.setItem("appLanguage", appLanguage);
+  }, [appLanguage]);
+
+  useEffect(() => {
+    const enableKeyboardMode = (event) => {
+      if (["Tab", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+        document.body.classList.add("using-keyboard-navigation");
+      }
+    };
+
+    const disableKeyboardMode = () => {
+      document.body.classList.remove("using-keyboard-navigation");
+    };
+
+    window.addEventListener("keydown", enableKeyboardMode);
+    window.addEventListener("pointerdown", disableKeyboardMode);
+
+    return () => {
+      window.removeEventListener("keydown", enableKeyboardMode);
+      window.removeEventListener("pointerdown", disableKeyboardMode);
+    };
+  }, []);
 
   useEffect(() => {
     refreshUser();
@@ -209,13 +532,13 @@ function App() {
     if (!materialId) return;
 
     if (libraryMaterials.some(m => String(m.id) === String(materialId))) {
-      setWarning(TEXT.duplicateMaterial);
+      setWarning(t.duplicateMaterial);
       setSelectedMaterial("");
       return;
     }
 
     if (uploadedFiles.length + libraryMaterials.length >= MAX_FILES) {
-      setWarning(TEXT.maxItems(MAX_FILES));
+      setWarning(t.maxItems(MAX_FILES));
       setSelectedMaterial("");
       return;
     }
@@ -266,22 +589,22 @@ function App() {
       const totalItems = next.length + libraryMaterials.length;
 
       if (!["pdf", "txt"].includes(ext)) {
-        setWarning(TEXT.unsupportedFileType(file.name));
+        setWarning(t.unsupportedFileType(file.name));
         return;
       }
 
       if (duplicate) {
-        setWarning(TEXT.duplicateFile);
+        setWarning(t.duplicateFile);
         return;
       }
 
       if (totalItems >= MAX_FILES) {
-        setWarning(TEXT.maxItems(MAX_FILES));
+        setWarning(t.maxItems(MAX_FILES));
         return;
       }
 
       if (totalSize > MAX_TOTAL_SIZE) {
-        setWarning(TEXT.maxSize);
+        setWarning(t.maxSize);
         return;
       }
 
@@ -320,7 +643,7 @@ function App() {
 
   const generateQuiz = async () => {
     if (uploadedFiles.length === 0 && libraryMaterials.length === 0) {
-      setWarning(TEXT.noInput);
+      setWarning(t.noInput);
       return;
     }
 
@@ -328,7 +651,7 @@ function App() {
       const wordCount = settings.extraInstructions.trim().split(/\s+/).length;
 
       if (wordCount > 5000) {
-        setWarning(TEXT.extraInstructionsTooLong(wordCount));
+        setWarning(t.extraInstructionsTooLong(wordCount));
         return;
       }
     }
@@ -351,7 +674,7 @@ function App() {
 
     setWarning("");
     setIsGenerating(true);
-    setLoadingText(TEXT.generatingQuiz);
+    setLoadingText(t.generatingQuiz);
     setLoadingVariant("generation");
     setScreen("loading");
 
@@ -366,13 +689,13 @@ function App() {
       });
 
       if (!data.questions || data.questions.length === 0) {
-        throw new Error(TEXT.noQuestionsGenerated);
+        throw new Error(t.noQuestionsGenerated);
       }
 
-      startQuiz(data.title || TEXT.generatedQuizTitle, data.questions, "new", null);
+      startQuiz(data.title || t.generatedQuizTitle, data.questions, "new", null);
     } catch (error) {
       setScreen("config");
-      setWarning(error.name === "AbortError" ? TEXT.generationCanceled : error.message || TEXT.generationError);
+      setWarning(error.name === "AbortError" ? t.generationCanceled : error.message || t.generationError);
     } finally {
       setIsGenerating(false);
       abortControllerRef.current = null;
@@ -521,12 +844,12 @@ function App() {
     }
 
     if (!saveName.trim()) {
-      setSaveMessage(TEXT.enterQuizName);
+      setSaveMessage(t.enterQuizName);
       return;
     }
 
     setIsSavingQuiz(true);
-    setSaveMessage("Saving quiz...");
+    setSaveMessage(t.savingQuiz);
 
     try {
       await api("/save-result", {
@@ -544,7 +867,7 @@ function App() {
         }),
       });
 
-      setSaveMessage(TEXT.savedSuccessfully);
+      setSaveMessage(t.savedSuccessfully);
       await refreshSavedQuizzes();
     } catch (error) {
       setSaveMessage(error.message);
@@ -560,7 +883,7 @@ function App() {
 
   const login = async () => {
     setLoginForm(prev => ({ ...prev, error: "" }));
-    setLoadingText(TEXT.signingIn);
+    setLoadingText(t.signingIn);
     setLoadingVariant("brief");
     setScreen("loading");
 
@@ -584,7 +907,7 @@ function App() {
         setPendingSaveAfterLogin(false);
         setScreen("results");
       } else {
-        setLoadingText(TEXT.loadingSavedQuizzes);
+        setLoadingText(t.loadingSavedQuizzes);
         setLoadingVariant("brief");
         await refreshSavedQuizzes();
         setScreen("dashboard");
@@ -597,7 +920,7 @@ function App() {
 
   const register = async () => {
     setRegisterForm(prev => ({ ...prev, error: "" }));
-    setLoadingText(TEXT.creatingAccount);
+    setLoadingText(t.creatingAccount);
     setLoadingVariant("brief");
     setScreen("loading");
 
@@ -622,7 +945,7 @@ function App() {
         setPendingSaveAfterLogin(false);
         setScreen("results");
       } else {
-        setLoadingText(TEXT.loadingSavedQuizzes);
+        setLoadingText(t.loadingSavedQuizzes);
         setLoadingVariant("brief");
         await refreshSavedQuizzes();
         setScreen("dashboard");
@@ -649,7 +972,7 @@ function App() {
       return;
     }
 
-    setLoadingText(TEXT.loadingSavedQuizzes);
+    setLoadingText(t.loadingSavedQuizzes);
     setLoadingVariant("brief");
     setScreen("loading");
 
@@ -682,7 +1005,7 @@ function App() {
   }, [savedQuizzes, sortBy, sortDir]);
 
   const startSavedQuiz = async (quiz) => {
-    setLoadingText(TEXT.loadingSavedQuiz);
+    setLoadingText(t.loadingSavedQuiz);
     setLoadingVariant("brief");
     setScreen("loading");
 
@@ -691,10 +1014,10 @@ function App() {
       const questions = Array.isArray(data) ? data : [];
 
       if (!questions.length) {
-        throw new Error(TEXT.noSavedQuestions);
+        throw new Error(t.noSavedQuestions);
       }
 
-      startQuiz(quiz.name || TEXT.savedQuizTitle, questions, "saved", quiz.id);
+      startQuiz(quiz.name || t.savedQuizTitle, questions, "saved", quiz.id);
     } catch (error) {
       setScreen("dashboard");
       alert(error.message);
@@ -727,7 +1050,7 @@ function App() {
       }
     }
 
-    throw lastError || new Error(TEXT.updateSavedQuizError);
+    throw lastError || new Error(t.updateSavedQuizError);
   };
 
   const openEditQuiz = (quiz) => {
@@ -746,7 +1069,7 @@ function App() {
     const name = editForm.name.trim();
 
     if (!name) {
-      setEditForm(prev => ({ ...prev, error: TEXT.enterQuizName }));
+      setEditForm(prev => ({ ...prev, error: t.enterQuizName }));
       return;
     }
 
@@ -770,7 +1093,7 @@ function App() {
     } catch (error) {
       setEditForm(prev => ({
         ...prev,
-        error: error.message || TEXT.updateSavedQuizError,
+        error: error.message || t.updateSavedQuizError,
       }));
     }
   };
@@ -798,7 +1121,7 @@ function App() {
       .map(({ index, userAnswer, ...q }) => q);
 
     if (questions.length > 0) {
-      startQuiz(TEXT.followUpQuizTitle, questions, "new", null);
+      startQuiz(t.followUpQuizTitle, questions, "new", null);
     }
   };
 
@@ -824,9 +1147,12 @@ function App() {
   return (
     <>
       <div className="main-wrapper">
-        <Navigation
+        <AppNavigation
           screen={screen}
           currentUser={currentUser}
+          t={t}
+          appLanguage={appLanguage}
+          setAppLanguage={setAppLanguage}
           openDashboard={openDashboard}
           logout={logout}
           backHome={() => setScreen("config")}
@@ -858,6 +1184,7 @@ function App() {
               generateQuiz={generateQuiz}
               warning={warning}
               isGenerating={isGenerating}
+              t={t}
             />
           )}
 
@@ -873,6 +1200,7 @@ function App() {
               showHint={showHint}
               setShowHint={setShowHint}
               examRuntime={examRuntime}
+              t={t}
             />
           )}
 
@@ -890,6 +1218,7 @@ function App() {
               saveMessage={saveMessage}
               isSavingQuiz={isSavingQuiz}
               retryIncorrect={retryIncorrect}
+              t={t}
             />
           )}
 
@@ -903,6 +1232,8 @@ function App() {
               setSortDir={setSortDir}
               startSavedQuiz={startSavedQuiz}
               editQuiz={openEditQuiz}
+              t={t}
+              appLanguage={appLanguage}
               askDelete={quiz => {
                 setDeleteTarget(quiz);
                 setModal("delete");
@@ -917,6 +1248,7 @@ function App() {
               login={login}
               goRegister={() => setScreen("register")}
               cancel={() => setScreen(pendingSaveAfterLogin ? "results" : "config")}
+              t={t}
             />
           )}
 
@@ -927,6 +1259,7 @@ function App() {
               register={register}
               goLogin={() => setScreen("login")}
               cancel={() => setScreen(pendingSaveAfterLogin ? "results" : "config")}
+              t={t}
             />
           )}
         </main>
@@ -938,15 +1271,16 @@ function App() {
           variant={loadingVariant}
           onCancel={cancelGeneration}
           canCancel={isGenerating}
+          t={t}
         />
       )}
 
       {modal === "exit" && (
         <ConfirmModal
-          title="End quiz?"
-          body="Your progress in this quiz will be lost."
-          cancel="Continue"
-          confirm="End quiz"
+          title={t.endQuizTitle}
+          body={t.endQuizBody}
+          cancel={t.continueQuiz}
+          confirm={t.endQuiz}
           onCancel={() => setModal(null)}
           onConfirm={() => {
             setModal(null);
@@ -958,10 +1292,10 @@ function App() {
 
       {modal === "results-exit" && (
         <ConfirmModal
-          title="Leave results page?"
-          body="Make sure you have saved your quiz if you want to keep it."
-          cancel="Go back"
-          confirm="Leave"
+          title={t.exitResultsTitle}
+          body={t.exitResultsBody}
+          cancel={t.back}
+          confirm={t.leave}
           onCancel={() => setModal(null)}
           onConfirm={leaveResults}
         />
@@ -969,10 +1303,11 @@ function App() {
 
       {modal === "edit" && (
         <EditQuizModal
-          title={TEXT.editSavedQuiz}
-          body={TEXT.editSavedQuizBody}
+          title={t.editSavedQuiz}
+          body={t.editSavedQuizBody}
           form={editForm}
           setForm={setEditForm}
+          t={t}
           onCancel={() => {
             setEditTarget(null);
             setEditForm({ name: "", rating: "3", error: "" });
@@ -984,10 +1319,10 @@ function App() {
 
       {modal === "delete" && (
         <ConfirmModal
-          title="Delete quiz?"
-          body={`Are you sure you want to delete "${deleteTarget?.name || "this quiz"}"?`}
-          cancel="Cancel"
-          confirm="Delete"
+          title={t.deleteQuizTitle}
+          body={t.deleteQuizBody(deleteTarget?.name)}
+          cancel={t.cancel}
+          confirm={t.delete}
           onCancel={() => {
             setDeleteTarget(null);
             setModal(null);
@@ -996,6 +1331,68 @@ function App() {
         />
       )}
     </>
+  );
+}
+
+function AppNavigation({
+  screen,
+  currentUser,
+  t,
+  appLanguage,
+  setAppLanguage,
+  openDashboard,
+  logout,
+  backHome,
+  endQuiz,
+  exitResults,
+}) {
+  return (
+    <nav>
+      <div className="nav-left nav-actions">
+        {screen === "dashboard" && (
+          <button type="button" onClick={backHome}>
+            {t.backToStart}
+          </button>
+        )}
+
+        {screen === "dashboard" && (
+          <button type="button" onClick={logout}>
+            {t.logout}
+          </button>
+        )}
+
+        {screen === "quiz" && (
+          <button id="end-quiz-btn" type="button" onClick={endQuiz}>
+            {t.endQuiz}
+          </button>
+        )}
+
+        {screen === "results" && (
+          <button type="button" onClick={exitResults}>
+            {t.backToGenerator}
+          </button>
+        )}
+      </div>
+
+      <div className="nav-right">
+        {screen !== "loading" && (
+          <label className="language-switcher">
+            <span>{t.appLanguage}</span>
+            <select value={appLanguage} onChange={e => setAppLanguage(e.target.value)}>
+              <option value="en">{t.english}</option>
+              <option value="sv">{t.swedish}</option>
+            </select>
+          </label>
+        )}
+
+        {!["quiz", "login", "register", "loading"].includes(screen) && (
+          <button className="profile-btn" type="button" onClick={openDashboard}>
+            <span className="profile-icon">👤</span>{" "}
+            {currentUser ? t.myQuizzes(currentUser.user_name) : t.login}
+          </button>
+        )}
+      </div>
+    </nav>
   );
 }
 
@@ -1063,6 +1460,7 @@ function ConfigScreen(props) {
     generateQuiz,
     warning,
     isGenerating,
+    t,
   } = props;
 
   const totalMaterials = uploadedFiles.length + libraryMaterials.length;
@@ -1081,33 +1479,32 @@ function ConfigScreen(props) {
         <div className="hero-copy">
           <div className="hero-badge">
             <span className="hero-badge-dot"></span>
-            <span>AI-powered study sessions</span>
+            <span>{t.heroBadge}</span>
           </div>
 
-          <h1>Create focused quizzes from your course material.</h1>
+          <h1>{t.heroTitle}</h1>
 
           <p>
-            Upload PDFs, lecture notes or course-library material and turn them into clear practice sessions.
-            Get hints, explanations, source references and a stricter exam mode when you want a more realistic test.
+            {t.heroBody}
           </p>
 
           <div className="hero-highlights" aria-label="Main features">
             <div className="hero-highlight-card">
               <span>01</span>
-              <strong>Collect sources</strong>
-              <p>Upload your own notes or choose prepared course material. Combine several sources in one quiz without losing structure.</p>
+              <strong>{t.collectSources}</strong>
+              <p>{t.collectSourcesBody}</p>
             </div>
 
             <div className="hero-highlight-card">
               <span>02</span>
-              <strong>Tune the quiz</strong>
-              <p>Control question type, difficulty, language and exam mode in a compact setup that stays easy to understand.</p>
+              <strong>{t.tuneQuiz}</strong>
+              <p>{t.tuneQuizBody}</p>
             </div>
 
             <div className="hero-highlight-card">
               <span>03</span>
-              <strong>Review smarter</strong>
-              <p>Use explanations, sources and follow-up practice so mistakes become focused repetition.</p>
+              <strong>{t.reviewSmarter}</strong>
+              <p>{t.reviewSmarterBody}</p>
             </div>
           </div>
         </div>
@@ -1115,11 +1512,11 @@ function ConfigScreen(props) {
 
       <div className="home-main-grid">
         <div className="source-panel glass-panel">
-          <div className="section-kicker">Step 1</div>
+          <div className="section-kicker">{t.step1}</div>
           <div className="panel-heading-row">
             <div>
-              <h2>Start with your material</h2>
-              <p className="muted">Drop in your own files or pick saved material from the course library.</p>
+              <h2>{t.startWithMaterial}</h2>
+              <p className="muted">{t.startWithMaterialBody}</p>
             </div>
           </div>
 
@@ -1130,8 +1527,8 @@ function ConfigScreen(props) {
               onClick={() => fileInputRef.current?.click()}
             >
               <div className="choice-icon">↥</div>
-              <h3>Upload files</h3>
-              <p>Add lecture slides, summaries or notes. PDF and TXT files work best.</p>
+              <h3>{t.uploadFiles}</h3>
+              <p>{t.uploadFilesBody}</p>
 
               <button
                 type="button"
@@ -1141,7 +1538,7 @@ function ConfigScreen(props) {
                   fileInputRef.current?.click();
                 }}
               >
-                Choose files
+                {t.chooseFiles}
               </button>
 
               <input
@@ -1159,29 +1556,29 @@ function ConfigScreen(props) {
 
             <div className="source-choice-card library-choice-card">
               <div className="choice-icon">◎</div>
-              <h3>Use course library</h3>
-              <p>Choose prepared university material and combine it with your own uploads.</p>
+              <h3>{t.useCourseLibrary}</h3>
+              <p>{t.useCourseLibraryBody}</p>
 
               <div className="library-select-stack">
                 <Select
                   value={selectedUniversity}
                   onChange={e => loadCourses(e.target.value)}
                   options={universities.map(u => [u.id, u.name])}
-                  placeholder="Select university"
+                  placeholder={t.selectUniversity}
                 />
 
                 <Select
                   value={selectedCourse}
                   onChange={e => loadMaterials(e.target.value)}
                   options={courses.map(c => [c.id, c.name])}
-                  placeholder="Select course"
+                  placeholder={t.selectCourse}
                 />
 
                 <Select
                   value={selectedMaterial}
                   onChange={e => addLibraryMaterial(e.target.value)}
                   options={materials.map(m => [m.id, m.title])}
-                  placeholder="Select material"
+                  placeholder={t.selectMaterial}
                 />
               </div>
             </div>
@@ -1192,53 +1589,58 @@ function ConfigScreen(props) {
             libraryMaterials={libraryMaterials}
             removeFile={removeFile}
             removeMaterial={removeMaterial}
+            t={t}
           />
 
           <div className="source-footer">
-            <p className="muted">Supported formats: .txt, .pdf · Max {MAX_FILES} files/materials</p>
+            <p className="muted">{t.supportedFormats(MAX_FILES)}</p>
             {warning && <p id="file-warning" className="form-warning">{warning}</p>}
           </div>
         </div>
 
         <div className="settings-panel glass-panel">
-          <div className="section-kicker">Step 2</div>
-          <h2>Quiz settings</h2>
-          <p className="muted">Fine-tune the quiz style before generating.</p>
+          <div className="section-kicker">{t.step2}</div>
+          <h2>{t.quizSettings}</h2>
+          <p className="muted">{t.quizSettingsBody}</p>
 
           <div className="settings-card-inner">
             <div className="config-grid premium-config-grid">
               <LabeledSelect
-                label="Questions"
+                label={t.questions}
                 value={settings.num}
                 onChange={e => updateSetting("num", e.target.value)}
                 options={["5", "10", "15", "20", "25", "30"]}
               />
 
               <LabeledSelect
-                label="Type"
+                label={t.type}
                 value={settings.type}
                 onChange={e => updateSetting("type", e.target.value)}
                 options={[
-                  ["T/F", "True / False"],
-                  ["MCQ", "Multiple Choice"],
+                  ["T/F", t.trueFalse],
+                  ["MCQ", t.multipleChoice],
                 ]}
               />
 
               <LabeledSelect
-                label="Difficulty"
+                label={t.difficulty}
                 value={settings.difficulty}
                 onChange={e => updateSetting("difficulty", e.target.value)}
-                options={["Easy", "Medium", "Hard"]}
+                options={[
+                  ["Easy", t.easy],
+                  ["Medium", t.medium],
+                  ["Hard", t.hard],
+                ]}
               />
 
               <LabeledSelect
-                label="Language"
+                label={t.language}
                 value={settings.language}
                 onChange={e => updateSetting("language", e.target.value)}
                 options={[
-                  ["Auto", "Auto (recommended)"],
-                  "Swedish",
-                  "English",
+                  ["Auto", t.autoRecommended],
+                  ["Swedish", t.swedish],
+                  ["English", t.english],
                 ]}
               />
             </div>
@@ -1246,8 +1648,8 @@ function ConfigScreen(props) {
             <div className="exam-mode-card">
               <div className="exam-mode-main">
                 <div>
-                  <h3>Exam mode</h3>
-                  <p className="muted">Turn on a stricter mode with fewer shortcuts and optional time pressure.</p>
+                  <h3>{t.examMode}</h3>
+                  <p className="muted">{t.examModeBody}</p>
                 </div>
 
                 <Switch
@@ -1260,21 +1662,21 @@ function ConfigScreen(props) {
                 <div className="exam-settings premium-exam-settings">
                   <div className="config-grid exam-settings-grid">
                     <LabeledSelect
-                      label="Time limit"
+                      label={t.timeLimit}
                       value={settings.examTimeLimit}
                       onChange={e => updateSetting("examTimeLimit", e.target.value)}
                       options={[
-                        ["0", "No limit"],
-                        ["5", "5 minutes"],
-                        ["10", "10 minutes"],
-                        ["15", "15 minutes"],
-                        ["30", "30 minutes"],
-                        ["60", "60 minutes"],
+                        ["0", t.noLimit],
+                        ["5", t.minutes(5)],
+                        ["10", t.minutes(10)],
+                        ["15", t.minutes(15)],
+                        ["30", t.minutes(30)],
+                        ["60", t.minutes(60)],
                       ]}
                     />
 
                     <div className="switch-setting-row exam-feedback-card">
-                      <label className="switch-setting-label">Show explanation</label>
+                      <label className="switch-setting-label">{t.showExplanation}</label>
 
                       <Switch
                         checked={settings.examFeedback}
@@ -1287,14 +1689,14 @@ function ConfigScreen(props) {
             </div>
 
             <div className="extra-instructions-section premium-extra">
-              <h3 className="settings-subheading">Extra instructions</h3>
+              <h3 className="settings-subheading">{t.extraInstructions}</h3>
 
               <textarea
                 rows="3"
                 maxLength={MAX_CHARS}
                 value={settings.extraInstructions}
                 onChange={e => updateSetting("extraInstructions", e.target.value)}
-                placeholder="Example: focus on definitions, make the questions harder, avoid asking about exact years..."
+                placeholder={t.extraInstructionsPlaceholder}
               />
 
               <div className="char-counter">
@@ -1307,17 +1709,17 @@ function ConfigScreen(props) {
 
       <div className="generate-dock">
         <div>
-          <h2>Ready when your material is.</h2>
+          <h2>{t.readyTitle}</h2>
           <p className="muted">
             {totalMaterials > 0
-              ? `${totalMaterials} material${totalMaterials === 1 ? "" : "s"} selected.`
-              : "Add at least one file or course material to continue."}
+              ? t.materialsSelected(totalMaterials)
+              : t.addMaterialToContinue}
           </p>
         </div>
 
         <div className="generate-dock-actions">
           <button type="button" onClick={resetInputArea}>
-            Reset
+            {t.reset}
           </button>
 
           <button
@@ -1326,7 +1728,7 @@ function ConfigScreen(props) {
             disabled={isGenerating}
             onClick={generateQuiz}
           >
-            {isGenerating ? "Generating..." : "Generate quiz"}
+            {isGenerating ? t.generating : t.generateQuiz}
           </button>
         </div>
       </div>
@@ -1345,9 +1747,10 @@ function QuizScreen({
   showHint,
   setShowHint,
   examRuntime,
+  t,
 }) {
   const q = quizData[currentQuestion] || {
-    question: "Loading question...",
+    question: t.loadingQuestion,
     options: [],
   };
 
@@ -1427,11 +1830,11 @@ function QuizScreen({
 
         {showFeedback && (
           <p id="inline-explanation" className="muted">
-            <strong>{selected === q.correct ? "Correct." : "Incorrect."}</strong>
+            <strong>{selected === q.correct ? t.correct : t.incorrect}</strong>
             <br />
             {selected !== q.correct && (
               <>
-                Correct answer: {q.options?.[q.correct]}
+                {t.correctAnswer} {q.options?.[q.correct]}
                 <br />
               </>
             )}
@@ -1441,7 +1844,7 @@ function QuizScreen({
               <>
                 <br />
                 <br />
-                <span className="muted">Source: {q.source}</span>
+                <span className="muted">{t.source} {q.source}</span>
               </>
             )}
           </p>
@@ -1449,7 +1852,7 @@ function QuizScreen({
 
         {showHint && !answered && (
           <div id="hint-box">
-            {q.hint || `Look for the part of the material connected to: ${q.source || q.question}`}
+            {q.hint || t.hintFallback(q.source || q.question)}
           </div>
         )}
 
@@ -1488,6 +1891,7 @@ function ResultsScreen({
   saveMessage,
   isSavingQuiz,
   retryIncorrect,
+  t,
 }) {
   const percent = quizData.length ? Math.round((score / quizData.length) * 100) : 0;
 
@@ -1495,39 +1899,39 @@ function ResultsScreen({
     <section id="results-screen">
       <div className="card result-card">
         <h2 id="result-text">
-          Results: {score}/{quizData.length}
+          {t.results} {score}/{quizData.length}
           <br />
-          {percent}% correct
+          {percent}% {t.percentCorrect}
         </h2>
 
         {quizMode === "new" && (
           <div className="save-quiz-section">
-            <h3>Save this quiz</h3>
+            <h3>{t.saveThisQuiz}</h3>
 
             <div className="save-form">
               <input
                 type="text"
                 value={saveName}
                 onChange={e => setSaveName(e.target.value)}
-                placeholder="Name your quiz"
+                placeholder={t.nameYourQuiz}
                 maxLength="50"
                 disabled={isSavingQuiz}
               />
 
               <div className="rating-box">
-                <label>Rate the difficulty:</label>
+                <label>{t.rateDifficulty}</label>
 
                 <select value={saveRating} onChange={e => setSaveRating(e.target.value)} disabled={isSavingQuiz}>
-                  <option value="5">⭐⭐⭐⭐⭐ (Perfect)</option>
-                  <option value="4">⭐⭐⭐⭐ (Good)</option>
-                  <option value="3">⭐⭐⭐ (Okay)</option>
-                  <option value="2">⭐⭐ (Needs work)</option>
-                  <option value="1">⭐ (Poor)</option>
+                  <option value="5">{t.ratingPerfect}</option>
+                  <option value="4">{t.ratingGood}</option>
+                  <option value="3">{t.ratingOkay}</option>
+                  <option value="2">{t.ratingNeedsWork}</option>
+                  <option value="1">{t.ratingPoor}</option>
                 </select>
               </div>
 
               <button className="primary" type="button" onClick={saveQuiz} disabled={isSavingQuiz}>
-                {isSavingQuiz ? "Saving..." : "Save to My Quizzes"}
+                {isSavingQuiz ? t.saving : t.saveToMyQuizzes}
               </button>
 
               {saveMessage && (
@@ -1542,23 +1946,23 @@ function ResultsScreen({
       </div>
 
       <div id="wrong-answers-list">
-        <h3>Questions to review:</h3>
+        <h3>{t.questionsToReview}</h3>
 
         {wrongAnswers.length === 0 ? (
           <div className="wrong-answer-item">
-            <strong>No incorrect answers 🎉</strong>
+            <strong>{t.noIncorrectAnswers}</strong>
           </div>
         ) : (
           wrongAnswers.map(q => (
             <div className="wrong-answer-item" key={q.index}>
-              <strong>Question {q.index + 1}:</strong> {q.question}
+              <strong>{t.questionLabel(q.index + 1)}</strong> {q.question}
               <br />
               <span className="muted">
-                Your answer: {q.options?.[q.userAnswer] || "Skipped"}
+                {t.yourAnswer} {q.options?.[q.userAnswer] || t.skipped}
               </span>
               <br />
               <span className="muted">
-                Correct answer: {q.options?.[q.correct]}
+                {t.correctAnswer} {q.options?.[q.correct]}
               </span>
               <br />
               <br />
@@ -1566,7 +1970,7 @@ function ResultsScreen({
               {q.source && (
                 <>
                   <br />
-                  <span className="muted">Source: {q.source}</span>
+                  <span className="muted">{t.source} {q.source}</span>
                 </>
               )}
             </div>
@@ -1577,7 +1981,7 @@ function ResultsScreen({
       {wrongAnswers.length > 0 && quizMode === "new" && (
         <div className="navigation-row results-navigation-row">
           <button className="primary" type="button" onClick={retryIncorrect}>
-            Follow Up Quiz ({Math.min(5, wrongAnswers.length)})
+            {t.followUpQuiz(Math.min(5, wrongAnswers.length))}
           </button>
         </div>
       )}
@@ -1594,19 +1998,21 @@ function DashboardScreen({
   setSortDir,
   startSavedQuiz,
   editQuiz,
+  t,
+  appLanguage,
   askDelete,
 }) {
   return (
     <section id="dashboard-screen">
       <div className="card dashboard-header">
-        <h2>{currentUser ? `${currentUser.user_name}'s Saved Quizzes` : "My Saved Quizzes"}</h2>
+        <h2>{currentUser ? t.savedQuizzesTitle(currentUser.user_name) : t.mySavedQuizzes}</h2>
 
         <div className="dashboard-sort-row">
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
-            <option value="date">Sort by: Date</option>
-            <option value="name">Sort by: Name</option>
-            <option value="score">Sort by: Score</option>
-            <option value="rating">Sort by: Rating</option>
+            <option value="date">{t.sortByDate}</option>
+            <option value="name">{t.sortByName}</option>
+            <option value="score">{t.sortByScore}</option>
+            <option value="rating">{t.sortByRating}</option>
           </select>
 
           <button
@@ -1614,7 +2020,7 @@ function DashboardScreen({
             type="button"
             onClick={() => setSortDir(sortDir === "desc" ? "asc" : "desc")}
           >
-            {sortDir === "desc" ? "↓ Descending" : "↑ Ascending"}
+            {sortDir === "desc" ? t.descending : t.ascending}
           </button>
         </div>
       </div>
@@ -1622,7 +2028,7 @@ function DashboardScreen({
       <div className="dashboard-list">
         {sortedQuizzes.length === 0 ? (
           <div className="card">
-            <p className="muted">No saved quizzes yet.</p>
+            <p className="muted">{t.noSavedQuizzes}</p>
           </div>
         ) : (
           sortedQuizzes.map(quiz => (
@@ -1630,22 +2036,22 @@ function DashboardScreen({
               <div className="quiz-info">
                 <h3>{quiz.name}</h3>
                 <p className="muted">
-                  {formatDate(quiz.date)} · {quiz.numQuestions || 0} questions · Recent score:{" "}
-                  {Math.round(quiz.scorePercent || 0)}% · Rating: {"⭐".repeat(quiz.rating || 0)}
+                  {formatDate(quiz.date, appLanguage, t)} · {quiz.numQuestions || 0} {t.questions.toLowerCase()} · {t.recentScore}{" "}
+                  {Math.round(quiz.scorePercent || 0)}% · {t.rating} {"⭐".repeat(quiz.rating || 0)}
                 </p>
               </div>
 
               <div className="dashboard-button-group">
                 <button className="primary small-btn" type="button" onClick={() => startSavedQuiz(quiz)}>
-                  Redo
+                  {t.redo}
                 </button>
 
                 <button className="small-btn" type="button" onClick={() => editQuiz(quiz)}>
-                  Edit
+                  {t.edit}
                 </button>
 
                 <button className="small-btn delete-btn" type="button" onClick={() => askDelete(quiz)}>
-                  Delete
+                  {t.delete}
                 </button>
               </div>
             </div>
@@ -1656,35 +2062,35 @@ function DashboardScreen({
   );
 }
 
-function LoginScreen({ form, setForm, login, goRegister, cancel }) {
+function LoginScreen({ form, setForm, login, goRegister, cancel, t }) {
   return (
     <section id="login-screen">
       <div className="card login-card">
-        <h2>Log in</h2>
+        <h2>{t.login}</h2>
 
         <div className="save-form">
           <input
             type="text"
             value={form.username}
             onChange={e => setForm({ ...form, username: e.target.value })}
-            placeholder="Username"
+            placeholder={t.username}
           />
 
           <input
             type="password"
             value={form.password}
             onChange={e => setForm({ ...form, password: e.target.value })}
-            placeholder="Password"
+            placeholder={t.password}
           />
 
           <button className="primary" type="button" onClick={login}>
-            Log in
+            {t.login}
           </button>
 
           {form.error && <p className="form-warning">{form.error}</p>}
 
           <button className="small-btn" type="button" onClick={goRegister}>
-            Create an account
+            {t.createAccount}
           </button>
 
           <button className="small-btn" type="button" onClick={cancel}>
@@ -1696,42 +2102,42 @@ function LoginScreen({ form, setForm, login, goRegister, cancel }) {
   );
 }
 
-function RegisterScreen({ form, setForm, register, goLogin, cancel }) {
+function RegisterScreen({ form, setForm, register, goLogin, cancel, t }) {
   return (
     <section id="register-screen">
       <div className="card login-card">
-        <h2>Create an account</h2>
+        <h2>{t.createAccount}</h2>
 
         <div className="save-form">
           <input
             type="text"
             value={form.username}
             onChange={e => setForm({ ...form, username: e.target.value })}
-            placeholder="Username"
+            placeholder={t.username}
           />
 
           <input
             type="email"
             value={form.email}
             onChange={e => setForm({ ...form, email: e.target.value })}
-            placeholder="Email"
+            placeholder={t.email}
           />
 
           <input
             type="password"
             value={form.password}
             onChange={e => setForm({ ...form, password: e.target.value })}
-            placeholder="Password"
+            placeholder={t.password}
           />
 
           <button className="primary" type="button" onClick={register}>
-            Register
+            {t.register}
           </button>
 
           {form.error && <p className="form-warning">{form.error}</p>}
 
           <button className="small-btn" type="button" onClick={goLogin}>
-            Already have an account?
+            {t.alreadyHaveAccount}
           </button>
 
           <button className="small-btn" type="button" onClick={cancel}>
@@ -1743,7 +2149,7 @@ function RegisterScreen({ form, setForm, register, goLogin, cancel }) {
   );
 }
 
-function FileList({ uploadedFiles, libraryMaterials, removeFile, removeMaterial }) {
+function FileList({ uploadedFiles, libraryMaterials, removeFile, removeMaterial, t }) {
   if (uploadedFiles.length === 0 && libraryMaterials.length === 0) {
     return null;
   }
@@ -1753,13 +2159,13 @@ function FileList({ uploadedFiles, libraryMaterials, removeFile, removeMaterial 
       <div id="file-list">
         {libraryMaterials.map((material, index) => (
           <div className="file-item animate-in" key={`library-${material.id}`}>
-            <span>Library: {material.title}</span>
+            <span>{t.libraryPrefix} {material.title}</span>
 
             <button
               type="button"
               className="file-remove-btn"
-              aria-label={`Remove ${material.title}`}
-              title="Remove"
+              aria-label={t.remove(material.title)}
+              title={t.delete}
               onClick={() => removeMaterial(index)}
             >
               &times;
@@ -1774,8 +2180,8 @@ function FileList({ uploadedFiles, libraryMaterials, removeFile, removeMaterial 
             <button
               type="button"
               className="file-remove-btn"
-              aria-label={`Remove ${file.name}`}
-              title="Remove"
+              aria-label={t.remove(file.name)}
+              title={t.delete}
               onClick={() => removeFile(index)}
             >
               &times;
@@ -1855,7 +2261,7 @@ function ConfirmModal({ title, body, cancel, confirm, onCancel, onConfirm }) {
   );
 }
 
-function EditQuizModal({ title, body, form, setForm, onCancel, onConfirm }) {
+function EditQuizModal({ title, body, form, setForm, onCancel, onConfirm, t }) {
   return (
     <div className="modal" onClick={onCancel}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -1867,22 +2273,22 @@ function EditQuizModal({ title, body, form, setForm, onCancel, onConfirm }) {
             type="text"
             value={form.name}
             onChange={e => setForm({ ...form, name: e.target.value, error: "" })}
-            placeholder="Quiz name"
+            placeholder={t.quizName}
             maxLength="50"
           />
 
           <div className="rating-box">
-            <label>Rating:</label>
+            <label>{t.rating}</label>
 
             <select
               value={form.rating}
               onChange={e => setForm({ ...form, rating: e.target.value, error: "" })}
             >
-              <option value="5">⭐⭐⭐⭐⭐ (Perfect)</option>
-              <option value="4">⭐⭐⭐⭐ (Good)</option>
-              <option value="3">⭐⭐⭐ (Okay)</option>
-              <option value="2">⭐⭐ (Needs work)</option>
-              <option value="1">⭐ (Poor)</option>
+              <option value="5">{t.ratingPerfect}</option>
+              <option value="4">{t.ratingGood}</option>
+              <option value="3">{t.ratingOkay}</option>
+              <option value="2">{t.ratingNeedsWork}</option>
+              <option value="1">{t.ratingPoor}</option>
             </select>
           </div>
 
@@ -1891,11 +2297,11 @@ function EditQuizModal({ title, body, form, setForm, onCancel, onConfirm }) {
 
         <div className="modal-buttons">
           <button type="button" onClick={onCancel}>
-            Cancel
+            {t.cancel}
           </button>
 
           <button className="primary" type="button" onClick={onConfirm}>
-            Save changes
+            {t.saveChanges}
           </button>
         </div>
       </div>
@@ -1903,18 +2309,19 @@ function EditQuizModal({ title, body, form, setForm, onCancel, onConfirm }) {
   );
 }
 
-function LoadingScreen({ text, variant = "brief", onCancel, canCancel }) {
+function LoadingScreen({ text, variant = "brief", onCancel, canCancel, t }) {
   const [statusIndex, setStatusIndex] = useState(0);
+  const generationMessages = t.generationStatusMessages;
 
   useEffect(() => {
     if (variant !== "generation") return undefined;
 
     const intervalId = setInterval(() => {
-      setStatusIndex(index => (index + 1) % GENERATION_STATUS_MESSAGES.length);
+      setStatusIndex(index => (index + 1) % generationMessages.length);
     }, 2200);
 
     return () => clearInterval(intervalId);
-  }, [variant]);
+  }, [variant, generationMessages.length]);
 
   if (variant !== "generation") {
     return (
@@ -1930,7 +2337,7 @@ function LoadingScreen({ text, variant = "brief", onCancel, canCancel }) {
   return (
     <div id="loading-screen" className="generation-loading-screen">
       <div className="loading-card premium-loading-card">
-        <p className="loading-context-label">Preparing quiz</p>
+        <p className="loading-context-label">{t.aiPreparingQuiz}</p>
         <div className="loading-visual" aria-hidden="true">
           <span className="processing-node processing-node-source">TXT</span>
           <div className="loading-orb premium-loading-orb"></div>
@@ -1940,16 +2347,16 @@ function LoadingScreen({ text, variant = "brief", onCancel, canCancel }) {
 
         <div className="loading-copy" role="status" aria-live="polite">
           <p className="generation-status" key={statusIndex}>
-            {GENERATION_STATUS_MESSAGES[statusIndex]}
+            {generationMessages[statusIndex]}
           </p>
           <p className="muted">
-            Larger files can take a moment.
+            {t.generationDelayNote}
           </p>
         </div>
 
         {canCancel && (
           <button className="small-btn loading-cancel-btn" type="button" onClick={onCancel}>
-            Cancel generation
+            {t.cancel}
           </button>
         )}
       </div>
@@ -2027,10 +2434,10 @@ function formatFileSize(bytes) {
   return `${(bytes / Math.pow(1024, index)).toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
 }
 
-function formatDate(date) {
-  if (!date) return "Unknown date";
+function formatDate(date, appLanguage = "en", t = UI_TEXT.en) {
+  if (!date) return t.unknownDate;
 
-  return new Date(date).toLocaleDateString(undefined, {
+  return new Date(date).toLocaleDateString(APP_LOCALES[appLanguage] || APP_LOCALES.en, {
     year: "numeric",
     month: "short",
     day: "numeric",
