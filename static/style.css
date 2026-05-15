@@ -5382,17 +5382,46 @@ button:focus-visible,
 .generate-main-btn:focus-visible,
 #quiz-screen button.option:focus-visible,
 .source-choice-card:focus-visible,
-.quiz-setting-card:focus-within,
-.exam-mode-card:focus-within,
-.premium-extra:focus-within,
+.quiz-setting-card:has(:focus-visible),
+.exam-mode-card:has(:focus-visible),
+.premium-extra:has(:focus-visible),
 .drop-zone:focus-visible,
-textarea:focus,
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="email"]:focus,
-select:focus {
+textarea:focus-visible,
+input[type="text"]:focus-visible,
+input[type="password"]:focus-visible,
+input[type="email"]:focus-visible,
+select:focus-visible {
     outline: none !important;
     box-shadow: var(--motion-focus-ring), var(--motion-shadow-control) !important;
+}
+
+button:focus:not(:focus-visible),
+.small-btn:focus:not(:focus-visible),
+.profile-btn:focus:not(:focus-visible),
+.generate-main-btn:focus:not(:focus-visible),
+#quiz-screen button.option:focus:not(:focus-visible),
+.drop-zone:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+input[type="text"]:focus:not(:focus-visible),
+input[type="password"]:focus:not(:focus-visible),
+input[type="email"]:focus:not(:focus-visible),
+select:focus:not(:focus-visible) {
+    outline: none !important;
+}
+
+textarea:focus:not(:focus-visible),
+input[type="text"]:focus:not(:focus-visible),
+input[type="password"]:focus:not(:focus-visible),
+input[type="email"]:focus:not(:focus-visible),
+select:focus:not(:focus-visible) {
+    border-color: rgba(217, 202, 184, 0.82) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.quiz-setting-card:focus-within:not(:has(:focus-visible)),
+.exam-mode-card:focus-within:not(:has(:focus-visible)),
+.premium-extra:focus-within:not(:has(:focus-visible)) {
+    box-shadow: 0 12px 34px rgba(32, 28, 24, 0.045) !important;
 }
 
 .choice-icon,
@@ -5583,4 +5612,63 @@ select:focus {
 .file-remove-btn:hover:not(:disabled) {
     background: #fee2e2 !important;
     border-color: rgba(239, 68, 68, 0.34) !important;
+}
+
+/* ==========================================
+   LANGUAGE SWITCHER & FOCUS MODALITY FIXES
+========================================== */
+.language-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    color: var(--muted-text-color);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.language-switcher select {
+    width: auto !important;
+    min-width: 132px;
+    min-height: 38px !important;
+    padding: 7px 32px 7px 12px !important;
+    border-radius: 999px !important;
+    font-size: 0.88rem;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.exam-feedback-card:hover {
+    transform: none !important;
+}
+
+body:not(.using-keyboard-navigation) button:focus-visible,
+body:not(.using-keyboard-navigation) .small-btn:focus-visible,
+body:not(.using-keyboard-navigation) .profile-btn:focus-visible,
+body:not(.using-keyboard-navigation) .generate-main-btn:focus-visible,
+body:not(.using-keyboard-navigation) #quiz-screen button.option:focus-visible,
+body:not(.using-keyboard-navigation) .drop-zone:focus-visible,
+body:not(.using-keyboard-navigation) textarea:focus-visible,
+body:not(.using-keyboard-navigation) input[type="text"]:focus-visible,
+body:not(.using-keyboard-navigation) input[type="password"]:focus-visible,
+body:not(.using-keyboard-navigation) input[type="email"]:focus-visible,
+body:not(.using-keyboard-navigation) select:focus-visible {
+    outline: none !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+body:not(.using-keyboard-navigation) textarea:focus-visible,
+body:not(.using-keyboard-navigation) input[type="text"]:focus-visible,
+body:not(.using-keyboard-navigation) input[type="password"]:focus-visible,
+body:not(.using-keyboard-navigation) input[type="email"]:focus-visible,
+body:not(.using-keyboard-navigation) select:focus-visible {
+    border-color: rgba(217, 202, 184, 0.82) !important;
+}
+
+body:not(.using-keyboard-navigation) .quiz-setting-card:has(:focus-visible),
+body:not(.using-keyboard-navigation) .exam-mode-card:has(:focus-visible),
+body:not(.using-keyboard-navigation) .premium-extra:has(:focus-visible) {
+    box-shadow: 0 12px 34px rgba(32, 28, 24, 0.045) !important;
 }
