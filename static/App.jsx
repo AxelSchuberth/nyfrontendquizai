@@ -3,6 +3,9 @@
 const UI_TEXT = window.UI_TEXT || {};
 const TEXT = UI_TEXT.en || UI_TEXT.sv || {};
 const APP_LOCALES = { en: "en-US", sv: "sv-SE" };
+const THEME_STORAGE_KEY = "theme";
+const SUPPORTED_THEMES = ["light", "dark"];
+const DARK_THEMES = new Set(["dark"]);
 const detectAppLanguage = () => {
   const savedLanguage = window.localStorage?.getItem("appLanguage");
 
@@ -12,6 +15,19 @@ const detectAppLanguage = () => {
 
   const languages = navigator.languages?.length ? navigator.languages : [navigator.language || "en"];
   return languages.some(language => String(language).toLowerCase().startsWith("sv")) ? "sv" : "en";
+};
+const detectTheme = () => {
+  const savedTheme = window.localStorage?.getItem(THEME_STORAGE_KEY);
+  if (savedTheme === "dracula" || savedTheme === "dark") {
+    return "dark";
+  }
+  if (savedTheme === "default" || savedTheme === "light") {
+    return "light";
+  }
+  return "light";
+};
+const applyTheme = (themeName) => {
+  document.documentElement.setAttribute("data-theme", SUPPORTED_THEMES.includes(themeName) ? themeName : "light");
 };
 
 const MAX_FILES = 5;
@@ -33,6 +49,7 @@ const api = async (url, options = {}) => {
 
 function App() {
   const [appLanguage, setAppLanguage] = useState(detectAppLanguage);
+  const [theme, setTheme] = useState(detectTheme);
   const t = UI_TEXT[appLanguage] || TEXT;
   const [screen, setScreen] = useState("config");
   const [loadingText, setLoadingText] = useState(t.readingDocuments);
@@ -113,6 +130,11 @@ function App() {
     document.documentElement.lang = appLanguage;
     window.localStorage?.setItem("appLanguage", appLanguage);
   }, [appLanguage]);
+
+  useEffect(() => {
+    applyTheme(theme);
+    window.localStorage?.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
 
   useEffect(() => {
     const enableKeyboardMode = (event) => {
@@ -232,7 +254,7 @@ function App() {
         ...prev,
         {
           id: data.id,
-          title: data.title || "Untitled material",
+          title: data.title || t.untitledMaterial,
           content: data.content || "",
         },
       ]);
@@ -835,11 +857,14 @@ function App() {
           t={t}
           appLanguage={appLanguage}
           setAppLanguage={setAppLanguage}
+          theme={theme}
+          setTheme={setTheme}
           openDashboard={openDashboard}
           openLogin={() => setScreen("login")}
           openRegister={() => setScreen("register")}
           logout={logout}
           backHome={() => setScreen("config")}
+          openDashboardFromQuiz={() => setModal("dashboard-exit")}
           endQuiz={() => setModal("exit")}
           exitResults={() => setModal("results-exit")}
         />
@@ -985,6 +1010,21 @@ function App() {
         />
       )}
 
+      {modal === "dashboard-exit" && (
+        <ConfirmModal
+          title={t.endQuizTitle}
+          body={t.endQuizBody}
+          cancel={t.continueQuiz}
+          confirm={t.dashboard}
+          onCancel={() => setModal(null)}
+          onConfirm={async () => {
+            setModal(null);
+            resetQuizRuntime();
+            await openDashboard();
+          }}
+        />
+      )}
+
       {modal === "edit" && (
         <EditQuizModal
           title={t.editSavedQuiz}
@@ -1024,23 +1064,31 @@ function AppNavigation({
   t,
   appLanguage,
   setAppLanguage,
+  theme,
+  setTheme,
   openDashboard,
   openLogin,
   openRegister,
   logout,
   backHome,
+  openDashboardFromQuiz,
   endQuiz,
   exitResults,
 }) {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef(null);
-  const isAuthScreen = ["login", "register", "loading"].includes(screen);
-  const hideAccountControls = ["quiz", "login", "register", "loading"].includes(screen);
+  const hideAccountControls = screen === "loading";
+  const languageControlLabel = t.appLanguage;
+  const homeButtonLabel = t.home;
+  const themeIcon = DARK_THEMES.has(theme) ? "🌙" : "☀️";
+  const nextTheme = theme === "dark" ? "light" : "dark";
+  const themeToggleLabel = theme === "dark" ? t.themeLight : t.themeDark;
   const homeAction = screen === "quiz"
     ? endQuiz
     : screen === "results"
       ? exitResults
       : backHome;
+  const showQuizDashboardButton = screen === "quiz" && Boolean(currentUser);
 
   useEffect(() => {
     setAccountMenuOpen(false);
@@ -1078,53 +1126,67 @@ function AppNavigation({
   };
 
   return (
-    <nav className={`floating-nav-shell${isAuthScreen ? " floating-nav-shell-auth" : ""}`} aria-label="Primary">
+    <nav className="floating-nav-shell" aria-label={t.primaryNavigation}>
       <div className="floating-nav">
         <div className="floating-nav-section floating-nav-section-left nav-actions">
           <button
-            className={`nav-icon-btn nav-home-btn${screen === "config" ? " is-current" : ""}`}
+            className={`navbar-button navbar-home-button${screen === "config" ? " is-current" : ""}`}
             type="button"
             onClick={homeAction}
-            aria-label={t.backToStart}
-            title={t.backToStart}
+            aria-label={t.home}
+            title={t.home}
           >
-            <span aria-hidden="true">⌂</span>
+            <span className="navbar-home-label">{homeButtonLabel}</span>
           </button>
 
-          {screen === "quiz" && (
-            <button id="end-quiz-btn" className="nav-utility-btn nav-danger-btn" type="button" onClick={endQuiz}>
-              {t.endQuiz}
-            </button>
-          )}
-
-          {screen === "results" && (
-            <button className="nav-utility-btn" type="button" onClick={exitResults}>
-              {t.backToGenerator}
-            </button>
-          )}
-
-          {screen === "dashboard" && (
-            <button className="nav-utility-btn" type="button" onClick={backHome}>
-              {t.backToStart}
+          {showQuizDashboardButton && (
+            <button
+              className="navbar-button navbar-dashboard-button"
+              type="button"
+              onClick={openDashboardFromQuiz}
+              aria-label={t.dashboard}
+              title={t.dashboard}
+            >
+              <span className="navbar-dashboard-label">{t.dashboard}</span>
             </button>
           )}
         </div>
 
         <div className="floating-nav-section floating-nav-section-right">
           {screen !== "loading" && (
-            <label className="language-switcher floating-language-switcher">
-              <span>{t.appLanguage}</span>
-              <select value={appLanguage} onChange={e => setAppLanguage(e.target.value)}>
+            <div className="navbar-theme-control">
+              <button
+                type="button"
+                className="navbar-button navbar-theme-button"
+                aria-label={themeToggleLabel}
+                title={themeToggleLabel}
+                onClick={() => setTheme(nextTheme)}
+              >
+                <span className="navbar-theme-icon" aria-hidden="true">{themeIcon}</span>
+              </button>
+            </div>
+          )}
+
+          {screen !== "loading" && (
+            <div className="floating-language-switcher">
+              <label className="visually-hidden" htmlFor="app-language-select">{languageControlLabel}</label>
+              <select
+                id="app-language-select"
+                className="navbar-button navbar-language-select"
+                aria-label={languageControlLabel}
+                value={appLanguage}
+                onChange={e => setAppLanguage(e.target.value)}
+              >
                 <option value="en">{t.english}</option>
                 <option value="sv">{t.swedish}</option>
               </select>
-            </label>
+            </div>
           )}
 
           {!hideAccountControls && (
             <div className="account-menu" ref={accountMenuRef}>
               <button
-                className="profile-btn account-menu-trigger"
+                className="profile-btn navbar-button account-menu-trigger"
                 type="button"
                 onClick={() => setAccountMenuOpen(open => !open)}
                 aria-haspopup="menu"
@@ -1140,7 +1202,7 @@ function AppNavigation({
               </button>
 
               {accountMenuOpen && (
-                <div className="account-dropdown" role="menu">
+                <div className="account-dropdown" role="menu" aria-label={t.accountMenu}>
                   {currentUser && (
                     <div className="account-dropdown-user" role="presentation">
                       <span className="account-dropdown-eyebrow">{t.username}</span>
@@ -1174,47 +1236,6 @@ function AppNavigation({
             </div>
           )}
         </div>
-      </div>
-    </nav>
-  );
-}
-
-function Navigation({ screen, currentUser, openDashboard, logout, backHome, endQuiz, exitResults }) {
-  return (
-    <nav>
-      <div className="nav-left nav-actions">
-        {screen === "dashboard" && (
-          <button type="button" onClick={backHome}>
-            ← Back to start
-          </button>
-        )}
-
-        {screen === "dashboard" && (
-          <button type="button" onClick={logout}>
-            Log out
-          </button>
-        )}
-
-        {screen === "quiz" && (
-          <button id="end-quiz-btn" type="button" onClick={endQuiz}>
-            End quiz
-          </button>
-        )}
-
-        {screen === "results" && (
-          <button type="button" onClick={exitResults}>
-            ← Back to generator
-          </button>
-        )}
-      </div>
-
-      <div className="nav-right">
-        {!["quiz", "login", "register", "loading"].includes(screen) && (
-          <button className="profile-btn" type="button" onClick={openDashboard}>
-            <span className="profile-icon">👤</span>{" "}
-            {currentUser ? `${currentUser.user_name}'s Quizzes` : "Log in"}
-          </button>
-        )}
       </div>
     </nav>
   );
@@ -1271,7 +1292,7 @@ function ConfigScreen(props) {
             {t.heroBody}
           </p>
 
-          <div className="hero-highlights" aria-label="Main features">
+          <div className="hero-highlights" aria-label={t.mainFeatures}>
             <div className="hero-highlight-card">
               <span>01</span>
               <strong>{t.collectSources}</strong>
@@ -1428,7 +1449,7 @@ function ConfigScreen(props) {
               />
             </div>
 
-            <div className="exam-mode-card">
+            <div className="select-wrapper quiz-setting-card">
               <div className="exam-mode-main">
                 <div>
                   <h3>{t.examMode}</h3>
@@ -1458,7 +1479,7 @@ function ConfigScreen(props) {
                       ]}
                     />
 
-                    <div className="switch-setting-row exam-feedback-card">
+                    <div className="select-wrapper quiz-setting-card">
                       <label className="switch-setting-label">{t.showExplanation}</label>
 
                       <Switch
@@ -1471,7 +1492,7 @@ function ConfigScreen(props) {
               )}
             </div>
 
-            <div className="extra-instructions-section premium-extra">
+            <div className="select-wrapper quiz-setting-card">
               <h3 className="settings-subheading">{t.extraInstructions}</h3>
 
               <textarea
@@ -1566,7 +1587,7 @@ function QuizScreen({
 
         {examRuntime.active && examRuntime.remaining > 0 && (
           <div className="exam-timer">
-            ⏱️ Time remaining:{" "}
+            ⏱️ {t.timeRemaining}{" "}
             <span id="time-remaining-text">{formatTime(examRuntime.remaining)}</span>
           </div>
         )}
@@ -1642,18 +1663,18 @@ function QuizScreen({
         <div className="navigation-row">
           {!examRuntime.active && (
             <button type="button" onClick={goBack} disabled={currentQuestion === 0}>
-              ← Back
+              {t.back}
             </button>
           )}
 
           {!examRuntime.active && !answered && (
             <button type="button" onClick={() => setShowHint(v => !v)}>
-              💡 Hint
+              {t.hint}
             </button>
           )}
 
           <button className="primary" type="button" onClick={goNext}>
-            {currentQuestion === quizData.length - 1 ? "Finish" : "Next →"}
+            {currentQuestion === quizData.length - 1 ? t.finish : t.next}
           </button>
         </div>
       </div>
@@ -1877,7 +1898,7 @@ function LoginScreen({ form, setForm, login, goRegister, cancel, t }) {
           </button>
 
           <button className="small-btn" type="button" onClick={cancel}>
-            ← Cancel
+            {t.cancel}
           </button>
         </div>
       </div>
@@ -1924,7 +1945,7 @@ function RegisterScreen({ form, setForm, register, goLogin, cancel, t }) {
           </button>
 
           <button className="small-btn" type="button" onClick={cancel}>
-            ← Cancel
+            {t.cancel}
           </button>
         </div>
       </div>
@@ -1958,7 +1979,7 @@ function FileList({ uploadedFiles, libraryMaterials, removeFile, removeMaterial,
 
         {uploadedFiles.map((file, index) => (
           <div className="file-item animate-in" key={`${file.name}-${file.size}-${index}`}>
-            <span>{file.name} ({formatFileSize(file.size)})</span>
+            <span>{file.name} ({formatFileSize(file.size, t)})</span>
 
             <button
               type="button"
@@ -2208,10 +2229,10 @@ function formatTime(seconds) {
   return `${minutes}:${secs}`;
 }
 
-function formatFileSize(bytes) {
-  if (!bytes) return "0 B";
+function formatFileSize(bytes, t = TEXT) {
+  if (!bytes) return t.fileSizeZero;
 
-  const units = ["B", "KB", "MB", "GB"];
+  const units = t.fileSizeUnits || ["B", "KB", "MB", "GB"];
   const index = Math.floor(Math.log(bytes) / Math.log(1024));
 
   return `${(bytes / Math.pow(1024, index)).toFixed(index === 0 ? 0 : 1)} ${units[index]}`;

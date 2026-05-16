@@ -1,0 +1,387 @@
+html[data-theme] {
+    --bg-color: var(--color-bg);
+    --card-bg: var(--color-surface);
+    --primary-color: var(--color-primary);
+    --primary-color-hover: var(--color-primary-hover);
+    --primary-color-soft: var(--color-primary-soft);
+    --text-color: var(--color-text);
+    --muted-text-color: var(--color-text-muted);
+    --text-warning-color: var(--color-error);
+    --exit-color: var(--color-error);
+    --exit-color-hover: var(--color-error);
+    --border-color: var(--color-border);
+    --border-color-strong: var(--color-border-strong);
+    --shadow-sm: var(--shadow-soft);
+    --shadow: var(--shadow-medium);
+    --shadow-lg: var(--shadow-strong);
+    --shadow-hover: var(--shadow-strong);
+    --option-color: var(--color-surface-elevated);
+    --option-selected: var(--color-primary-soft);
+    --success-bg: var(--color-success-soft);
+    --success-border: var(--color-success);
+    --danger-bg: var(--color-error-soft);
+    --danger-border: var(--color-error);
+    --warning-bg: var(--color-warning-soft);
+    --warning-border: var(--color-warning);
+    --font-sans: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --app-bg: var(--color-bg);
+    --app-surface: var(--color-surface);
+    --app-surface-strong: var(--color-surface-elevated);
+    --app-ink: var(--color-text);
+    --app-text: var(--color-text);
+    --app-muted: var(--color-text-muted);
+    --app-line: var(--color-border);
+    --app-primary: var(--color-primary);
+    --app-primary-dark: var(--color-primary-hover);
+    --app-primary-soft: var(--color-primary-soft);
+    --app-accent: var(--color-accent);
+    --app-good: var(--color-success);
+    --app-danger: var(--color-error);
+    --app-radius-xl: var(--radius-xl);
+    --app-radius-lg: var(--radius-lg);
+    --app-radius-md: var(--radius-md);
+    --app-shadow: var(--shadow-strong);
+    --app-shadow-soft: var(--shadow-medium);
+    --premium-bg-1: var(--color-bg);
+    --premium-bg-2: var(--color-bg-soft);
+    --premium-dark: var(--color-text);
+    --premium-text: var(--color-text);
+    --premium-muted: var(--color-text-muted);
+    --premium-line: var(--color-border);
+    --premium-glass: var(--color-surface-floating);
+    --premium-glass-strong: var(--color-surface-elevated);
+    --premium-primary: var(--color-primary);
+    --premium-primary-2: var(--color-accent);
+    --premium-cyan: var(--theme-cyan);
+    --premium-green: var(--color-success);
+    --premium-radius-xl: var(--radius-xl);
+    --premium-radius-lg: var(--radius-lg);
+    --premium-radius-md: var(--radius-md);
+    --premium-shadow: var(--shadow-strong);
+    --premium-shadow-soft: var(--shadow-medium);
+    --premium-ink: var(--color-text);
+    --premium-cream: var(--color-surface-elevated);
+    --premium-sand: var(--color-bg-soft);
+    --premium-violet: var(--color-primary);
+    --premium-violet-2: var(--color-accent);
+    --premium-apricot: var(--color-accent);
+    --premium-mint: var(--theme-cyan);
+    --transition-base: var(--transition-normal);
+    --motion-focus-ring: var(--color-focus-ring);
+    --motion-shadow-control: var(--shadow-soft);
+    --motion-shadow-surface: var(--shadow-medium);
+    --button-bg: var(--color-surface-elevated);
+    --button-text: var(--color-text);
+    --button-border: transparent;
+    --button-primary-text: #ffffff;
+    --button-primary-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 25%, transparent);
+    --button-primary-shadow-hover: 0 6px 14px color-mix(in srgb, var(--color-primary) 28%, transparent);
+    --icon-on-primary-text: #ffffff;
+    --button-secondary-bg: var(--color-surface-elevated);
+    --button-secondary-text: var(--color-text-muted);
+    --button-secondary-border: var(--color-border);
+    --button-secondary-bg-hover: var(--color-bg-soft);
+    --button-secondary-border-hover: var(--color-border-strong);
+    --profile-button-bg: var(--color-surface-elevated);
+    --profile-button-text: var(--color-primary);
+    --profile-button-border: color-mix(in srgb, var(--color-primary) 20%, transparent);
+    --profile-button-border-hover: color-mix(in srgb, var(--color-primary) 40%, transparent);
+    --danger-button-bg: var(--color-surface-elevated);
+    --danger-button-bg-hover: var(--color-error-soft);
+    --danger-button-border-soft: color-mix(in srgb, var(--color-error) 35%, white);
+    --danger-button-border: var(--color-error);
+    --dropzone-border: color-mix(in srgb, var(--color-primary) 30%, transparent);
+    --dropzone-bg: color-mix(in srgb, var(--color-primary) 4%, transparent);
+    --dropzone-bg-hover: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    --dropzone-shadow-hover: 0 6px 16px color-mix(in srgb, var(--color-primary) 14%, transparent);
+    --file-item-bg: var(--color-surface-elevated);
+    --file-remove-bg: var(--color-bg-soft);
+    --file-remove-text: var(--color-error);
+    --file-remove-bg-hover: var(--color-error-soft);
+    --feedback-warning-text: color-mix(in srgb, var(--color-warning) 70%, black);
+    --hint-border: color-mix(in srgb, var(--color-accent) 30%, white);
+    --hint-bg: color-mix(in srgb, var(--color-accent) 12%, white);
+    --hint-text: color-mix(in srgb, var(--color-primary) 55%, black);
+    --quiz-correct-text: color-mix(in srgb, var(--color-success) 72%, black);
+    --quiz-wrong-text: color-mix(in srgb, var(--color-error) 74%, black);
+    --quiz-correct-icon-bg: var(--color-success);
+    --quiz-wrong-icon-bg: var(--color-error);
+    --switch-track-bg: color-mix(in srgb, var(--color-text-muted) 35%, white);
+    --switch-knob-bg: var(--color-surface-elevated);
+    --switch-knob-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    --switch-focus-ring: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
+    --dashboard-item-bg: var(--color-surface-elevated);
+    --delete-btn-border: color-mix(in srgb, var(--color-error) 24%, white);
+    --delete-btn-bg-hover: var(--color-error-soft);
+    --tooltip-icon-text: var(--color-primary);
+    --tooltip-icon-bg: var(--color-primary-soft);
+    --tooltip-icon-bg-hover: color-mix(in srgb, var(--color-primary) 18%, white);
+    --tooltip-panel-text: #f8fafc;
+    --tooltip-panel-bg: #1e293b;
+    --tooltip-panel-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --overlay-bg: rgba(15, 23, 42, 0.6);
+    --modal-surface: var(--color-surface-elevated);
+    --modal-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --loading-screen-bg:
+        radial-gradient(circle at 22% 18%, color-mix(in srgb, var(--color-primary) 18%, transparent), transparent 30%),
+        radial-gradient(circle at 78% 76%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 34%),
+        linear-gradient(135deg, color-mix(in srgb, var(--color-bg-soft) 86%, white), color-mix(in srgb, var(--color-surface-elevated) 90%, white) 46%, color-mix(in srgb, var(--color-surface) 94%, white));
+    --brief-loading-screen-bg: color-mix(in srgb, var(--color-bg) 54%, transparent);
+    --loading-card-border: var(--color-surface-elevated);
+    --loading-card-bg: linear-gradient(180deg, var(--color-surface-elevated), var(--color-surface));
+    --loading-card-shadow: 0 28px 80px color-mix(in srgb, var(--color-text) 14%, transparent),
+        0 1px 0 color-mix(in srgb, var(--color-surface-elevated) 95%, white) inset,
+        0 0 0 1px color-mix(in srgb, var(--color-border) 35%, transparent);
+    --loading-card-sheen:
+        linear-gradient(115deg, transparent 0%, color-mix(in srgb, white 42%, transparent) 45%, transparent 70%),
+        radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--color-primary) 11%, transparent), transparent 36%);
+    --loading-card-sheen-opacity: 0.82;
+    --loading-card-sheen-filter: blur(0px);
+    --loading-card-sheen-duration: 4.8s;
+    --spinner-border: color-mix(in srgb, var(--color-primary) 16%, transparent);
+    --spinner-top: var(--color-primary);
+    --spinner-ring: 0 0 0 7px color-mix(in srgb, var(--color-primary) 7%, transparent);
+    --generation-screen-bg:
+        radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 35%),
+        color-mix(in srgb, var(--color-bg) 86%, transparent);
+    --generation-card-before:
+        radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--color-primary) 12%, transparent), transparent 34%),
+        radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 32%);
+    --generation-orb-bg:
+        radial-gradient(circle at 35% 28%, color-mix(in srgb, white 90%, transparent) 0 7%, transparent 17%),
+        conic-gradient(from 18deg, var(--color-primary), var(--theme-cyan), var(--color-success), color-mix(in srgb, var(--color-primary) 88%, white), var(--color-primary));
+    --generation-orb-shadow:
+        0 0 0 9px color-mix(in srgb, var(--color-primary) 8%, transparent),
+        0 18px 42px color-mix(in srgb, var(--color-primary) 24%, transparent);
+    --generation-orb-text: #ffffff;
+    --generation-orb-text-shadow: 0 2px 10px color-mix(in srgb, var(--color-text) 22%, transparent);
+    --generation-orb-after:
+        linear-gradient(135deg, color-mix(in srgb, white 20%, transparent), transparent),
+        color-mix(in srgb, var(--color-text) 10%, transparent);
+    --generation-orb-after-shadow: inset 0 0 0 1px color-mix(in srgb, white 30%, transparent);
+    --processing-node-text: var(--color-primary-hover);
+    --processing-node-bg: var(--color-surface-elevated);
+    --processing-node-border: color-mix(in srgb, var(--color-primary) 18%, transparent);
+    --processing-node-shadow: 0 10px 24px color-mix(in srgb, var(--color-text) 9%, transparent);
+    --processing-node-answer-text: color-mix(in srgb, var(--color-accent) 70%, black);
+    --processing-node-answer-border: color-mix(in srgb, var(--color-accent) 22%, transparent);
+    --generation-status-text: var(--color-primary-hover);
+    --loading-cancel-text: var(--color-text-muted);
+    --loading-cancel-bg: color-mix(in srgb, var(--color-surface-elevated) 54%, transparent);
+    --loading-cancel-border: color-mix(in srgb, var(--color-border) 48%, transparent);
+    --loading-cancel-text-hover: var(--color-text);
+    --loading-cancel-bg-hover: color-mix(in srgb, var(--color-surface-elevated) 78%, transparent);
+    --loading-cancel-shadow-hover: 0 8px 20px color-mix(in srgb, var(--color-text) 6%, transparent);
+    --brief-loading-sweep: linear-gradient(90deg, transparent, var(--color-primary), var(--theme-cyan), transparent);
+    --preview-option-text: var(--color-text-muted);
+    --preview-option-bg: color-mix(in srgb, var(--color-surface-elevated) 70%, transparent);
+    --preview-option-border: color-mix(in srgb, var(--color-border) 55%, transparent);
+    --preview-option-active-text: var(--color-primary-hover);
+    --loading-context-text: var(--color-text-muted);
+    --loading-context-bg: color-mix(in srgb, var(--color-bg-soft) 76%, transparent);
+    --loading-context-border: color-mix(in srgb, var(--color-border) 56%, transparent);
+    --exam-timer-text: var(--color-error);
+    --progress-track-bg: color-mix(in srgb, var(--color-bg-soft) 82%, white);
+    --progress-fill-bg: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    --option-hover-border: var(--color-border-strong);
+    --option-hover-bg: color-mix(in srgb, var(--color-bg-soft) 88%, white);
+    --loading-drop-bg: color-mix(in srgb, var(--color-text-muted) 40%, transparent);
+    --hero-grid-bg:
+        linear-gradient(color-mix(in srgb, var(--color-text) 2.5%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--color-text) 2.5%, transparent) 1px, transparent 1px);
+    --hero-glow-before: color-mix(in srgb, var(--color-primary) 13%, transparent);
+    --hero-glow-after: color-mix(in srgb, var(--color-accent) 13%, transparent);
+    --hero-shell-border: color-mix(in srgb, var(--color-surface-elevated) 94%, white);
+    --hero-shell-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-elevated) 94%, white), color-mix(in srgb, var(--color-surface) 88%, white));
+    --hero-shell-inner-border: color-mix(in srgb, var(--color-surface-elevated) 58%, transparent);
+    --hero-shell-glow: radial-gradient(circle, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 68%);
+    --hero-badge-surface: color-mix(in srgb, var(--color-primary-soft) 76%, var(--color-surface-elevated));
+    --hero-badge-border: color-mix(in srgb, var(--color-primary) 18%, transparent);
+    --hero-badge-shadow: 0 10px 24px color-mix(in srgb, var(--color-text) 4.5%, transparent);
+    --hero-badge-dot-bg: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    --hero-badge-dot-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 10%, transparent);
+    --hero-highlight-border: color-mix(in srgb, var(--color-surface-elevated) 88%, white);
+    --hero-highlight-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-elevated) 80%, white), color-mix(in srgb, var(--color-surface) 74%, white));
+    --hero-highlight-icon-text: #ffffff;
+    --hero-highlight-icon-bg: linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 72%, white));
+    --hero-highlight-icon-shadow: 0 13px 26px color-mix(in srgb, var(--color-primary) 22%, transparent);
+    --hero-highlight-icon-alt-bg: linear-gradient(135deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 72%, white));
+    --hero-highlight-icon-alt-shadow: 0 13px 26px color-mix(in srgb, var(--color-accent) 22%, transparent);
+    --hero-highlight-icon-tertiary-bg: linear-gradient(135deg, var(--theme-cyan), var(--color-primary));
+    --hero-highlight-icon-tertiary-shadow: 0 13px 26px color-mix(in srgb, var(--theme-cyan) 20%, transparent);
+    --section-kicker-bg: color-mix(in srgb, var(--color-primary-soft) 82%, var(--color-surface-elevated));
+    --section-kicker-border: color-mix(in srgb, var(--color-primary) 12%, transparent);
+    --source-card-border: color-mix(in srgb, var(--color-surface-elevated) 88%, white);
+    --source-card-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-elevated) 84%, white), color-mix(in srgb, var(--color-surface) 76%, white));
+    --source-card-shadow: 0 12px 34px color-mix(in srgb, var(--color-text) 4.5%, transparent);
+    --source-card-hover-border: color-mix(in srgb, var(--color-primary) 18%, transparent);
+    --source-card-hover-shadow: 0 24px 58px color-mix(in srgb, var(--color-text) 8.5%, transparent);
+    --choice-icon-bg: linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 72%, white));
+    --choice-icon-shadow: 0 16px 32px color-mix(in srgb, var(--color-primary) 22%, transparent);
+    --choice-icon-library-bg: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    --choice-icon-library-shadow: 0 16px 32px color-mix(in srgb, var(--color-accent) 22%, transparent);
+    --settings-surface-bg: color-mix(in srgb, var(--color-surface) 74%, white);
+    --surface-card-border-strong: color-mix(in srgb, var(--color-surface-elevated) 86%, white);
+    --input-surface-bg-strong: color-mix(in srgb, var(--color-surface-elevated) 92%, white);
+    --input-border-strong: color-mix(in srgb, var(--color-border) 82%, white);
+    --input-shadow-soft: 0 4px 12px color-mix(in srgb, var(--color-text) 2.5%, transparent);
+    --input-focus-border-strong: color-mix(in srgb, var(--color-primary) 76%, transparent);
+    --label-text-soft: color-mix(in srgb, var(--color-text-muted) 88%, var(--color-text));
+    --button-neutral-bg-strong: color-mix(in srgb, var(--color-surface-elevated) 78%, white);
+    --button-neutral-border-strong: color-mix(in srgb, var(--color-border) 86%, white);
+    --button-neutral-text-strong: var(--color-text);
+    --button-neutral-shadow: 0 8px 18px color-mix(in srgb, var(--color-text) 3.5%, transparent);
+    --button-primary-gradient: linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 72%, white));
+    --button-primary-gradient-hover: linear-gradient(135deg, var(--color-primary-hover), color-mix(in srgb, var(--color-primary) 58%, white));
+    --button-primary-shadow-strong: 0 16px 30px color-mix(in srgb, var(--color-primary) 25%, transparent);
+    --button-primary-shadow-strong-hover: 0 20px 36px color-mix(in srgb, var(--color-primary) 30%, transparent);
+    --generate-dock-bg: color-mix(in srgb, var(--color-surface-elevated) 88%, white);
+    --generate-dock-shadow: 0 22px 66px color-mix(in srgb, var(--color-text) 12%, transparent);
+    --generate-dock-overlay: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 8%, transparent), color-mix(in srgb, var(--color-accent) 6%, transparent));
+    --switch-active-bg: linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 72%, white));
+    --modal-surface-strong: color-mix(in srgb, var(--color-surface-elevated) 95%, white);
+    --premium-loading-screen-bg:
+        radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent 34%),
+        radial-gradient(circle at 65% 70%, color-mix(in srgb, var(--color-accent) 12%, transparent), transparent 32%),
+        color-mix(in srgb, var(--color-bg) 88%, transparent);
+    --premium-loading-card-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-elevated) 92%, white), color-mix(in srgb, var(--color-surface) 80%, white));
+    --premium-loading-card-border: color-mix(in srgb, var(--color-surface-elevated) 88%, white);
+    --premium-loading-card-shadow: 0 34px 90px color-mix(in srgb, var(--color-text) 14%, transparent);
+    --premium-loading-card-before:
+        radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 32%),
+        radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 30%);
+    --premium-loading-orb-bg:
+        radial-gradient(circle at 35% 30%, #ffffff 0%, color-mix(in srgb, #ffffff 85%, transparent) 14%, transparent 28%),
+        conic-gradient(from 0deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 72%, white), var(--color-accent), var(--theme-cyan), var(--color-primary));
+    --premium-loading-orb-shadow:
+        0 0 0 8px color-mix(in srgb, var(--color-primary) 8%, transparent),
+        0 18px 40px color-mix(in srgb, var(--color-primary) 28%, transparent);
+    --premium-loading-orb-center: color-mix(in srgb, var(--color-bg-soft) 92%, white);
+    --premium-loading-ring-border: color-mix(in srgb, var(--color-primary) 18%, transparent);
+    --premium-loading-ring-border-alt: color-mix(in srgb, var(--color-accent) 22%, transparent);
+    --loading-kicker-bg: color-mix(in srgb, var(--color-primary-soft) 90%, var(--color-surface-elevated));
+    --loading-kicker-border: color-mix(in srgb, var(--color-primary) 14%, transparent);
+    --loading-progress-track: color-mix(in srgb, var(--color-border) 70%, transparent);
+    --loading-step-bg: color-mix(in srgb, var(--color-surface) 62%, white);
+    --loading-step-border: color-mix(in srgb, var(--color-border) 70%, transparent);
+    --interactive-border-hover-strong: color-mix(in srgb, var(--color-primary) 34%, transparent);
+    --interactive-border-hover-soft: color-mix(in srgb, var(--color-primary) 24%, transparent);
+    --interactive-primary-hover-shadow:
+        0 18px 34px color-mix(in srgb, var(--color-primary) 26%, transparent),
+        0 0 0 1px color-mix(in srgb, var(--color-surface-elevated) 22%, transparent) inset;
+    --interactive-surface-hover-bg: color-mix(in srgb, var(--color-surface-elevated) 92%, white);
+    --interactive-surface-hover-shadow:
+        0 12px 26px color-mix(in srgb, var(--color-text) 8%, transparent),
+        0 0 0 1px color-mix(in srgb, var(--color-primary) 10%, transparent) inset;
+    --interactive-card-hover-shadow:
+        0 18px 44px color-mix(in srgb, var(--color-text) 9%, transparent),
+        0 0 0 1px color-mix(in srgb, var(--color-primary) 8%, transparent) inset;
+    --interactive-option-hover-bg: color-mix(in srgb, var(--color-bg-soft) 98%, white);
+    --interactive-option-hover-shadow:
+        0 12px 28px color-mix(in srgb, var(--color-text) 8%, transparent),
+        0 0 0 1px color-mix(in srgb, var(--color-primary) 8%, transparent) inset;
+    --interactive-input-hover-shadow:
+        0 8px 18px color-mix(in srgb, var(--color-text) 4.5%, transparent),
+        0 0 0 1px color-mix(in srgb, var(--color-primary) 6%, transparent) inset;
+    --loading-cancel-bg-strong: color-mix(in srgb, var(--color-surface-elevated) 86%, white);
+    --loading-cancel-border-strong: color-mix(in srgb, var(--color-text-muted) 34%, transparent);
+    --destructive-soft-text: color-mix(in srgb, var(--color-error) 72%, black);
+    --destructive-soft-bg: color-mix(in srgb, var(--color-error-soft) 92%, transparent);
+    --destructive-soft-border: color-mix(in srgb, var(--color-error) 34%, transparent);
+    --settings-card-bg: var(--source-card-bg);
+    --settings-card-shadow: var(--source-card-shadow);
+    --settings-card-overlay:
+        radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--color-primary) 8%, transparent), transparent 34%),
+        radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--theme-cyan) 5.5%, transparent), transparent 34%);
+    --settings-card-separator: color-mix(in srgb, var(--color-border) 70%, transparent);
+    --feedback-card-bg: color-mix(in srgb, var(--color-surface) 58%, white);
+    --feedback-card-border: color-mix(in srgb, var(--color-surface-elevated) 76%, white);
+    --feedback-card-shadow: 0 8px 20px color-mix(in srgb, var(--color-text) 3.5%, transparent);
+    --focus-reset-border: var(--input-border-strong);
+    --focus-reset-shadow: var(--input-shadow-soft);
+    --file-remove-text-strong: color-mix(in srgb, var(--color-error) 78%, black);
+    --file-remove-bg-strong: color-mix(in srgb, var(--color-error-soft) 76%, transparent);
+    --file-remove-border-strong: color-mix(in srgb, var(--color-error) 14%, transparent);
+    --file-remove-text-hover: #ffffff;
+    --file-remove-bg-hover-strong: var(--color-error);
+    --file-remove-border-hover: var(--color-error);
+    --file-remove-shadow-hover: 0 10px 22px color-mix(in srgb, var(--color-error) 22%, transparent);
+}
+
+body::before {
+    background: var(--theme-glow-1) !important;
+}
+
+body::after {
+    background: var(--theme-glow-2) !important;
+}
+
+.home-hero {
+    border-color: var(--color-surface-elevated) !important;
+    background:
+        linear-gradient(180deg, var(--color-surface-elevated), var(--color-surface)) !important;
+    box-shadow: var(--shadow-strong) !important;
+    backdrop-filter: blur(calc(var(--blur-surface) + 6px)) !important;
+    -webkit-backdrop-filter: blur(calc(var(--blur-surface) + 6px)) !important;
+}
+
+.home-hero::before {
+    border-color: var(--color-surface-floating) !important;
+}
+
+.home-hero::after {
+    background: radial-gradient(circle, var(--theme-glow-1), transparent 68%) !important;
+}
+
+.hero-badge,
+.section-kicker {
+    color: var(--color-primary-hover) !important;
+    background: var(--color-primary-soft) !important;
+    border-color: var(--color-border-strong) !important;
+    box-shadow: var(--shadow-soft) !important;
+}
+
+.glass-panel,
+.generate-dock,
+#quiz-screen .card,
+#results-screen .card,
+#dashboard-screen .card,
+#login-screen .card,
+#register-screen .card,
+.card,
+.saved-quiz-card,
+.file-item,
+.modal-content,
+.brief-loading-card,
+.loading-card {
+    border-color: var(--color-surface-elevated) !important;
+    background: var(--color-surface) !important;
+    box-shadow: var(--shadow-medium) !important;
+}
+
+.hero-highlight-card,
+.source-choice-card,
+.drop-zone {
+    border-color: var(--color-surface-elevated) !important;
+    background:
+        linear-gradient(180deg, var(--color-surface-elevated), var(--color-surface)) !important;
+    box-shadow: var(--shadow-soft) !important;
+}
+
+.hero-copy h1,
+.hero-highlight-card strong,
+.glass-panel h2,
+.generate-dock h2,
+.quiz-title,
+.dashboard-header h2,
+.source-choice-card h3,
+.modal-content h3 {
+    color: var(--color-text) !important;
+}
+
+.hero-copy p,
+.hero-highlight-card p,
+.source-choice-card p,
+.generate-dock p {
+    color: var(--color-text-muted) !important;
+}
