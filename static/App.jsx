@@ -836,6 +836,8 @@ function App() {
           appLanguage={appLanguage}
           setAppLanguage={setAppLanguage}
           openDashboard={openDashboard}
+          openLogin={() => setScreen("login")}
+          openRegister={() => setScreen("register")}
           logout={logout}
           backHome={() => setScreen("config")}
           endQuiz={() => setModal("exit")}
@@ -1023,56 +1025,155 @@ function AppNavigation({
   appLanguage,
   setAppLanguage,
   openDashboard,
+  openLogin,
+  openRegister,
   logout,
   backHome,
   endQuiz,
   exitResults,
 }) {
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef(null);
+  const isAuthScreen = ["login", "register", "loading"].includes(screen);
+  const hideAccountControls = ["quiz", "login", "register", "loading"].includes(screen);
+  const homeAction = screen === "quiz"
+    ? endQuiz
+    : screen === "results"
+      ? exitResults
+      : backHome;
+
+  useEffect(() => {
+    setAccountMenuOpen(false);
+  }, [screen, currentUser]);
+
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+
+    const handlePointerDown = (event) => {
+      if (!accountMenuRef.current?.contains(event.target)) {
+        setAccountMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setAccountMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [accountMenuOpen]);
+
+  const handleMenuAction = async (action) => {
+    setAccountMenuOpen(false);
+    await action();
+  };
+
   return (
-    <nav>
-      <div className="nav-left nav-actions">
-        {screen === "dashboard" && (
-          <button type="button" onClick={backHome}>
-            {t.backToStart}
+    <nav className={`floating-nav-shell${isAuthScreen ? " floating-nav-shell-auth" : ""}`} aria-label="Primary">
+      <div className="floating-nav">
+        <div className="floating-nav-section floating-nav-section-left nav-actions">
+          <button
+            className={`nav-icon-btn nav-home-btn${screen === "config" ? " is-current" : ""}`}
+            type="button"
+            onClick={homeAction}
+            aria-label={t.backToStart}
+            title={t.backToStart}
+          >
+            <span aria-hidden="true">⌂</span>
           </button>
-        )}
 
-        {screen === "dashboard" && (
-          <button type="button" onClick={logout}>
-            {t.logout}
-          </button>
-        )}
+          {screen === "quiz" && (
+            <button id="end-quiz-btn" className="nav-utility-btn nav-danger-btn" type="button" onClick={endQuiz}>
+              {t.endQuiz}
+            </button>
+          )}
 
-        {screen === "quiz" && (
-          <button id="end-quiz-btn" type="button" onClick={endQuiz}>
-            {t.endQuiz}
-          </button>
-        )}
+          {screen === "results" && (
+            <button className="nav-utility-btn" type="button" onClick={exitResults}>
+              {t.backToGenerator}
+            </button>
+          )}
 
-        {screen === "results" && (
-          <button type="button" onClick={exitResults}>
-            {t.backToGenerator}
-          </button>
-        )}
-      </div>
+          {screen === "dashboard" && (
+            <button className="nav-utility-btn" type="button" onClick={backHome}>
+              {t.backToStart}
+            </button>
+          )}
+        </div>
 
-      <div className="nav-right">
-        {screen !== "loading" && (
-          <label className="language-switcher">
-            <span>{t.appLanguage}</span>
-            <select value={appLanguage} onChange={e => setAppLanguage(e.target.value)}>
-              <option value="en">{t.english}</option>
-              <option value="sv">{t.swedish}</option>
-            </select>
-          </label>
-        )}
+        <div className="floating-nav-section floating-nav-section-right">
+          {screen !== "loading" && (
+            <label className="language-switcher floating-language-switcher">
+              <span>{t.appLanguage}</span>
+              <select value={appLanguage} onChange={e => setAppLanguage(e.target.value)}>
+                <option value="en">{t.english}</option>
+                <option value="sv">{t.swedish}</option>
+              </select>
+            </label>
+          )}
 
-        {!["quiz", "login", "register", "loading"].includes(screen) && (
-          <button className="profile-btn" type="button" onClick={openDashboard}>
-            <span className="profile-icon">👤</span>{" "}
-            {currentUser ? t.myQuizzes(currentUser.user_name) : t.login}
-          </button>
-        )}
+          {!hideAccountControls && (
+            <div className="account-menu" ref={accountMenuRef}>
+              <button
+                className="profile-btn account-menu-trigger"
+                type="button"
+                onClick={() => setAccountMenuOpen(open => !open)}
+                aria-haspopup="menu"
+                aria-expanded={accountMenuOpen}
+              >
+                <span className="profile-icon" aria-hidden="true">👤</span>
+                <span className="account-menu-label">
+                  {currentUser ? currentUser.user_name : t.login}
+                </span>
+                <span className={`account-menu-caret${accountMenuOpen ? " is-open" : ""}`} aria-hidden="true">
+                  ▾
+                </span>
+              </button>
+
+              {accountMenuOpen && (
+                <div className="account-dropdown" role="menu">
+                  {currentUser && (
+                    <div className="account-dropdown-user" role="presentation">
+                      <span className="account-dropdown-eyebrow">{t.username}</span>
+                      <strong>{currentUser.user_name}</strong>
+                    </div>
+                  )}
+
+                  {!currentUser && (
+                    <>
+                      <button type="button" role="menuitem" onClick={() => handleMenuAction(openLogin)}>
+                        {t.login}
+                      </button>
+                      <button type="button" role="menuitem" onClick={() => handleMenuAction(openRegister)}>
+                        {t.register}
+                      </button>
+                    </>
+                  )}
+
+                  {currentUser && (
+                    <>
+                      <button type="button" role="menuitem" onClick={() => handleMenuAction(openDashboard)}>
+                        {t.mySavedQuizzes}
+                      </button>
+                      <button type="button" role="menuitem" onClick={() => handleMenuAction(logout)}>
+                        {t.logout}
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   );

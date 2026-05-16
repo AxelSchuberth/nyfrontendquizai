@@ -1,12 +1,13 @@
 import psycopg2
+from config import DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_SSLMODE, DB_USER
 
 
 def get_connection():
     return psycopg2.connect(
-        host="aws-0-eu-west-1.pooler.supabase.com",
-        database="postgres",
-        user="postgres.ckwfsakidrsjlsiwgyng",
-        password="5rMldH4d3IspLGdD",
-        port=5432,
-        sslmode="require"
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT,
+        sslmode=DB_SSLMODE,
     )

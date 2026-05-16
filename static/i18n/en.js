@@ -45,7 +45,7 @@ window.UI_TEXT.en = {
     login: "Log in",
     myQuizzes: name => `${name}'s Quizzes`,
     heroBadge: "AI-powered study sessions",
-    heroTitle: "Create focused quizzes from your course material.",
+    heroTitle: "Create quizzes from your course material",
     heroBody: "Upload PDFs, lecture notes or course-library material and turn them into clear practice sessions. Get hints, explanations, source references and a stricter exam mode when you want a more realistic test.",
     collectSources: "Collect sources",
     collectSourcesBody: "Upload your own notes or choose prepared course material. Combine several sources in one quiz without losing structure.",
